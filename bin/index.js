@@ -9,8 +9,9 @@ const yargs = require("yargs");
 const ora = require("ora");
 const debug = require("debug")("fulcrum");
 const fs = require("fs");
-const generate = require("../lib/generate");
-const { contextualizeDependencyTree } = require("../lib/utils");
+
+const report = require("../lib/report");
+const { contextualizeDependencyTree } = require("../lib/dependencies");
 
 function getHrTimeInSeconds(hrtime) {
   const end = process.hrtime(hrtime);
@@ -68,7 +69,7 @@ const validPathReg = new RegExp(
   "^node_modules/((@([A-Za-z-0-9-_.]*)/([A-Za-z-0-9-_.]*))|([A-Za-z-0-9-_.]*))(/node_modules/((@([A-Za-z-_.]*)/([A-Za-z-_.]*))|([A-Za-z-_.]*)))*/package.json"
 );
 const cwd = path.resolve(process.cwd(), argv.path);
-
+const topLevelPackage = require(path.resolve(cwd, "package.json"));
 const packages = [];
 
 (async function main() {
@@ -115,15 +116,25 @@ const packages = [];
     changeStatus("Generating output");
 
     try {
-      const contextualTree = await contextualizeDependencyTree(packages, pool);
+      const contextualTree = await contextualizeDependencyTree(
+        packages,
+        topLevelPackage
+      );
 
       if (argv.report) {
         const reportPath = path.resolve(cwd, "fulcrum", "index.html");
 
-        await generate(contextualTree);
+        if (process.env.DEV_FULCRUM) {
+          changeStatus(`Dev server starting`);
+          progress.succeed();
+        }
 
-        changeStatus(`HTML Report was built to ${reportPath}`);
-        progress.succeed();
+        await report(contextualTree);
+
+        if (!process.env.DEV_FULCRUM) {
+          changeStatus(`HTML Report was built to ${reportPath}`);
+          progress.succeed();
+        }
       } else {
         const reportPath = path.resolve(cwd, "fulcrum", "report.json");
 
@@ -139,7 +150,9 @@ const packages = [];
         progress.succeed();
       }
     } catch (ex) {
-      changeStatus(`Failed with the following message - ${ex.message}`);
+      changeStatus(
+        `Failed with the following message - \n ${ex.stack.toString("utf8")}`
+      );
       progress.fail();
     }
 
