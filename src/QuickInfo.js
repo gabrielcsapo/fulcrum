@@ -16,65 +16,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function isNestedNodeModules(directory) {
-  const re = /(node_modules)/g;
-  return ((directory || "").match(re) || []).length;
-}
-
-function walkDependencies(dependency, callback) {
-  callback(dependency);
-
-  if (dependency.dependencies) {
-    Object.keys(dependency.dependencies).forEach((dep) => {
-      if (typeof dependency.dependencies[dep] != "object") {
-        console.log(dep, dependency.dependencies);
-      }
-
-      walkDependencies(dependency.dependencies[dep], callback);
-    });
-  }
-}
-
 function TopLevelDepCost() {
   // eslint-disable-next-line no-undef
-  const { dependencies, topLevelPackage, suggestions } = report;
+  const { package: _package, suggestions } = report;
   const costs = {};
 
-  const topLevelDeps = Object.assign(
-    {},
-    Object.assign({}, topLevelPackage.devDependencies || {}),
-    topLevelPackage.dependencies || {}
-  );
+  const topLevelDeps = [
+    ...Object.keys(_package.devDependencies || {}),
+    ...Object.keys(_package.dependencies || {}),
+  ];
 
-  walkTree(dependencies, (dependency) => {
-    Object.keys(topLevelDeps).forEach((_dependency) => {
-      if (
-        _dependency === dependency.name &&
-        isNestedNodeModules(dependency.directory) === 1
-      ) {
-        const directories = [];
+  suggestions.forEach((suggestion) => {
+    suggestion.actions.forEach((action) => {
+      const parts = action.meta.path.split("#");
 
-        walkDependencies(dependency, (dep) => {
-          if (!dep.directory) {
-            console.log(dep);
-          }
-          directories.push(dep.directory);
-        });
-
-        directories.forEach((directory) => {
-          suggestions.forEach((suggestion) => {
-            suggestion.actions.forEach((action) => {
-              if (action.meta.directory === directory) {
-                if (!costs[dependency.name]) {
-                  costs[dependency.name] = [];
-                }
-                costs[dependency.name].push({
-                  suggestion: suggestion.id,
-                  action,
-                });
-              }
-            });
-          });
+      if (parts.length > 0) {
+        if (!costs[parts[0]]) {
+          costs[parts[0]] = [];
+        }
+        costs[parts[0]].push({
+          suggestion: suggestion.id,
+          action,
         });
       }
     });
@@ -114,36 +76,38 @@ export default function QuickInfo() {
   const history = useHistory();
   const classes = useStyles();
 
-  const { topLevelPackage, dependencies, suggestions } = report;
+  console.log(report);
+
+  const { package: _package, dependencies, suggestions } = report;
 
   const topLevelDepsByCost = {};
 
   const topLevelDeps = Object.assign(
     {},
-    Object.assign({}, topLevelPackage.devDependencies || {}),
-    topLevelPackage.dependencies || {}
+    Object.assign({}, _package.devDependencies || {}),
+    _package.dependencies || {}
   );
 
-  walkTree(dependencies, (dependency) => {
-    Object.keys(topLevelDeps).forEach((_dependency) => {
-      if (
-        _dependency === dependency.name &&
-        isNestedNodeModules(dependency.directory) === 1
-      ) {
-        if (!topLevelDepsByCost[_dependency]) {
-          topLevelDepsByCost[_dependency] = {
-            id: _dependency,
-            name: _dependency,
-            value: 0,
-          };
-        }
+  // walkTree(dependencies, (dependency) => {
+  //   Object.keys(topLevelDeps).forEach((_dependency) => {
+  //     if (
+  //       _dependency === dependency.name &&
+  //       isNestedNodeModules(dependency.directory) === 1
+  //     ) {
+  //       if (!topLevelDepsByCost[_dependency]) {
+  //         topLevelDepsByCost[_dependency] = {
+  //           id: _dependency,
+  //           name: _dependency,
+  //           value: 0,
+  //         };
+  //       }
 
-        walkDependencies(dependency, (dep) => {
-          topLevelDepsByCost[_dependency].value += dep.size;
-        });
-      }
-    });
-  });
+  //       walkDependencies(dependency, (dep) => {
+  //         topLevelDepsByCost[_dependency].value += dep.size;
+  //       });
+  //     }
+  //   });
+  // });
 
   return (
     <Paper elevation={3} style={{ height: 300 }}>
