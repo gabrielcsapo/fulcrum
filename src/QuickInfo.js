@@ -8,7 +8,7 @@ import Paper from "@material-ui/core/Paper";
 import Link from "@material-ui/core/Link";
 import { ResponsivePie } from "@nivo/pie";
 
-import { walkTree, humanFileSize } from "../lib/utils";
+import { humanFileSize } from "../lib/utils";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,7 +28,10 @@ function TopLevelDepCost() {
 
   suggestions.forEach((suggestion) => {
     suggestion.actions.forEach((action) => {
-      const parts = action.meta.path.split("#");
+      if (!action.meta.breadcrumb) {
+        console.log(action.meta, suggestion);
+      }
+      const parts = action.meta.breadcrumb.split("#");
 
       if (parts.length > 0) {
         if (!costs[parts[0]]) {
@@ -76,11 +79,7 @@ export default function QuickInfo() {
   const history = useHistory();
   const classes = useStyles();
 
-  console.log(report);
-
   const { package: _package, dependencies, suggestions } = report;
-
-  const topLevelDepsByCost = {};
 
   const topLevelDeps = Object.assign(
     {},
@@ -88,85 +87,28 @@ export default function QuickInfo() {
     _package.dependencies || {}
   );
 
-  // walkTree(dependencies, (dependency) => {
-  //   Object.keys(topLevelDeps).forEach((_dependency) => {
-  //     if (
-  //       _dependency === dependency.name &&
-  //       isNestedNodeModules(dependency.directory) === 1
-  //     ) {
-  //       if (!topLevelDepsByCost[_dependency]) {
-  //         topLevelDepsByCost[_dependency] = {
-  //           id: _dependency,
-  //           name: _dependency,
-  //           value: 0,
-  //         };
-  //       }
-
-  //       walkDependencies(dependency, (dep) => {
-  //         topLevelDepsByCost[_dependency].value += dep.size;
-  //       });
-  //     }
-  //   });
-  // });
-
   return (
     <Paper elevation={3} style={{ height: 300 }}>
       <Grid container className={classes.root} spacing={2}>
-        <Grid item xs={3} style={{ height: 300 }}>
-          <ResponsivePie
-            data={Object.keys(topLevelDepsByCost).map(
-              (name) => topLevelDepsByCost[name]
-            )}
-            sortByValue={true}
-            margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
-            innerRadius={0.5}
-            padAngle={0.7}
-            cornerRadius={3}
-            colors={{ scheme: "nivo" }}
-            borderWidth={1}
-            borderColor={{ from: "color", modifiers: [["darker", 0.2]] }}
-            enableRadialLabels={false}
-            radialLabelsSkipAngle={10}
-            radialLabelsTextXOffset={6}
-            radialLabelsTextColor="#333333"
-            radialLabelsLinkOffset={0}
-            radialLabelsLinkDiagonalLength={16}
-            radialLabelsLinkHorizontalLength={24}
-            radialLabelsLinkStrokeWidth={1}
-            radialLabelsLinkColor={{ from: "color" }}
-            enableSlicesLabels={false}
-            slicesLabelsSkipAngle={10}
-            slicesLabelsTextColor="#333333"
-            animate={true}
-            motionStiffness={90}
-            motionDamping={15}
-            onClick={function (e) {
-              console.log(e);
-              history.push(`/dependencies/${encodeURIComponent(e.name)}`);
-            }}
-            tooltip={function (e) {
-              return e.id + " (" + humanFileSize(e.value) + ")";
-            }}
-          />
-        </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={6}>
           <Typography style={{ padding: 20 }}>
-            The current project currently has{" "}
-            {Object.keys(topLevelDepsByCost).length.toLocaleString()}{" "}
-            dependencies. As well as{" "}
+            The current project "{_package.name}" currently has{" "}
+            {Object.keys(topLevelDeps).length.toLocaleString()} direct
+            dependencies. As well as {dependencies.length.toLocaleString()}{" "}
+            total sub dependencies. There are a total of{" "}
             {suggestions
               .map((suggestion) => suggestion.actions.length)
               .reduce((a, b) => a + b, 0)
               .toLocaleString()}{" "}
             suggestions. The size currently taken up by the dependenices is{" "}
             {humanFileSize(
-              Object.keys(topLevelDepsByCost)
-                .map((name) => topLevelDepsByCost[name].value)
+              dependencies
+                .map(([, dependencyInfo]) => dependencyInfo.size)
                 .reduce((a, b) => a + b, 0)
             )}
           </Typography>
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={6}>
           <TopLevelDepCost />
         </Grid>
       </Grid>

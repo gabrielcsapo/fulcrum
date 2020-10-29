@@ -11,99 +11,46 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import Badge from "@material-ui/core/Badge";
-
-import { walkTree } from "../lib/utils";
-import { ReportOffSharp } from "@material-ui/icons";
-
-function isNestedNodeModules(directory) {
-  const re = /(node_modules)/g;
-  return ((directory || "").match(re) || []).length > 1;
-}
-
-function findNestedPackage(obj, packageName, path) {
-  obj.alreadyFound = true;
-
-  if (!path) {
-    path = obj.directory;
-  }
-
-  let found = [];
-
-  for (const nestedPackageName in obj.dependencies) {
-    if (nestedPackageName === packageName) {
-      found.push({
-        fullLocation: path + "/node_modules/" + packageName,
-        dependency: obj.dependencies[nestedPackageName],
-      });
-    }
-
-    if (obj.dependencies[nestedPackageName].dependencies) {
-      if (obj.dependencies[nestedPackageName].alreadyFound) continue;
-
-      found = [
-        ...found,
-        ...findNestedPackage(
-          obj.dependencies[nestedPackageName],
-          packageName,
-          path + "/node_modules/" + nestedPackageName
-        ),
-      ];
-    }
-  }
-
-  return found;
-}
-
-function decorateTopLevelDependencies(obj, dependencies, path) {
-  if (!path) {
-    path = obj.directory;
-  }
-
-  for (const nestedPackageName in obj.dependencies) {
-    let nestedPackage = obj.dependencies[nestedPackageName];
-    if (!isNestedNodeModules(nestedPackage.directory)) {
-      if (obj.dependencies[nestedPackageName].alreadyDecorated) return;
-
-      obj.dependencies[nestedPackageName] = dependencies.find(
-        (d) => d.name === nestedPackage.name
-      );
-      obj.dependencies[nestedPackageName].alreadyDecorated = true;
-    }
-
-    if (nestedPackage.dependencies) {
-      decorateTopLevelDependencies(
-        obj.dependencies[nestedPackageName],
-        dependencies,
-        path + "/node_modules/" + nestedPackage.name
-      );
-    }
-  }
-
-  return;
-}
 
 export default function ModuleInfo() {
-  let { id } = useParams();
-
-  const { package: _package, suggestions } = report;
-
+  const { id } = useParams();
   const name = decodeURIComponent(id);
 
-  const versions = [];
+  const { dependencies, suggestions } = report;
 
+  const versions = {};
   const locations = {};
+
+  for (const [, dependencyInfo] of dependencies) {
+    if (dependencyInfo.name === name) {
+      const breadcrumb = dependencyInfo.breadcrumb;
+      const version = dependencyInfo?.packageInfo?.version;
+
+      if (version) {
+        if (!versions[version]) {
+          versions[version] = 0;
+        }
+        versions[version] += 1;
+      }
+
+      if (!locations[breadcrumb]) {
+        locations[breadcrumb] = {
+          version,
+          actions: [],
+        };
+      }
+    }
+  }
 
   suggestions.forEach((suggestion) => {
     suggestion.actions.forEach((action) => {
-      const parts = action.meta.path.split("#");
+      const parts = action.meta.breadcrumb.split("#");
 
-      if (parts.length > 0 && parts[0] === name) {
-        if (!locations[action.meta.path]) {
-          locations[action.meta.path] = [];
-        }
-
-        locations[action.meta.path].push(action);
+      // we want to split the breadcrumb (foo#bar#@moo/bar)
+      // if the last value is the name of the current module we are looking at
+      // pick this and update the location object with the suggestion.
+      if (parts.length > 0 && parts[parts.length - 1] === name) {
+        locations[action.meta.breadcrumb].actions.push(action);
       }
     });
   });
@@ -112,9 +59,9 @@ export default function ModuleInfo() {
     <div>
       <h3>{name}</h3>
       <div>
-        {Object.keys({}).map((version) => (
+        {Object.keys(versions).map((version) => (
           <span key={version}>
-            {version} ({0})
+            {version} ({versions[version]})
           </span>
         ))}
       </div>
@@ -126,18 +73,26 @@ export default function ModuleInfo() {
             <Accordion key={i}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Breadcrumbs aria-label="breadcrumb" key={i}>
-                  {locationPath.split("#").map((segment, j, array) => {
+                  {locationPath.split("#").map((segment, j, arr) => {
+                    if (j === arr.length - 1) {
+                      return (
+                        <Typography key={j}>
+                          {segment}@{locations[locationPath].version}
+                        </Typography>
+                      );
+                    }
                     return <Typography key={j}>{segment}</Typography>;
                   })}
                   {locations[locationPath] && (
-                    <Avatar>{locations[locationPath].length}</Avatar>
+                    <Avatar>{locations[locationPath]?.actions.length}</Avatar>
                   )}
                 </Breadcrumbs>
               </AccordionSummary>
               <AccordionDetails>
                 <List>
                   {locations[locationPath] &&
-                    locations[locationPath].map((suggestion, k) => {
+                    locations[locationPath].actions &&
+                    locations[locationPath].actions.map((suggestion, k) => {
                       return (
                         <ListItem divider={true} key={k}>
                           <ListItemText primary={suggestion.message} />

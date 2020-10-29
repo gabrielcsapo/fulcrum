@@ -5,6 +5,8 @@ import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import { red } from "@material-ui/core/colors";
+import { Link as RouterLink } from "react-router-dom";
+import Link from "@material-ui/core/Link";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -45,6 +47,15 @@ export default function SuggestionCard(props) {
         <Typography variant="body2" color="textSecondary" component="p">
           {suggestion.message}
         </Typography>
+        <Link
+          component={RouterLink}
+          to={{
+            pathname: `/suggestion/${suggestion.id}`,
+            state: { modal: true },
+          }}
+        >
+          See actions
+        </Link>
       </CardContent>
     </Card>
   );

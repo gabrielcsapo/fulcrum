@@ -25,6 +25,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import ModuleInfo from "./ModuleInfo";
 import ModuleExplorerList from "./ModuleExplorerList";
 import Dashboard from "./Dashboard";
+import SuggestionModal from "./SuggestionModal";
 
 const styles = (theme) => ({
   root: {
@@ -169,6 +170,11 @@ class App extends Component {
                 <ModuleInfo />
               </Route>
             </Switch>
+            <Route
+              exact
+              path="/suggestion/:id"
+              render={() => <SuggestionModal />}
+            />
             <Route
               exact
               path="/explorer"
