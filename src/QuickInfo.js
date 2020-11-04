@@ -28,9 +28,6 @@ function TopLevelDepCost() {
 
   suggestions.forEach((suggestion) => {
     suggestion.actions.forEach((action) => {
-      if (!action.meta.breadcrumb) {
-        console.log(action.meta, suggestion);
-      }
       const parts = action.meta.breadcrumb.split("#");
 
       if (parts.length > 0) {

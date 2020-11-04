@@ -16,13 +16,21 @@ export default function ModuleInfo() {
   const { id } = useParams();
   const name = decodeURIComponent(id);
 
-  const { dependencies, suggestions } = report;
+  const { dependencies, suggestions, latestPackages } = report;
 
   const versions = {};
   const locations = {};
 
-  for (const [, dependencyInfo] of dependencies) {
+  const topLevelPath = `node_modules/${name}`;
+
+  let topLevelPackage = {};
+
+  for (const [dependencyPath, dependencyInfo] of dependencies) {
     if (dependencyInfo.name === name) {
+      if (dependencyPath === topLevelPath) {
+        topLevelPackage = dependencyInfo;
+      }
+
       const breadcrumb = dependencyInfo.breadcrumb;
       const version = dependencyInfo?.packageInfo?.version;
 
@@ -50,7 +58,7 @@ export default function ModuleInfo() {
       // if the last value is the name of the current module we are looking at
       // pick this and update the location object with the suggestion.
       if (parts.length > 0 && parts[parts.length - 1] === name) {
-        locations[action.meta.breadcrumb].actions.push(action);
+        locations[action.meta.breadcrumb].actions.push([suggestion, action]);
       }
     });
   });
@@ -58,7 +66,12 @@ export default function ModuleInfo() {
   return (
     <div>
       <h3>{name}</h3>
+      <pre>{topLevelPackage.packageInfo.description}</pre>
+      {topLevelPackage.packageInfo.homepage && <h4>Homepage: <a href={topLevelPackage.packageInfo.homepage}>{topLevelPackage.packageInfo.homepage}</a></h4>}
+      {topLevelPackage.packageInfo.funding && <h4>Funding: <a href={topLevelPackage.packageInfo.funding}>{topLevelPackage.packageInfo.funding}</a></h4>}
+      <h4>Latest: {latestPackages[name]}</h4>
       <div>
+        <i>Versions: </i>
         {Object.keys(versions).map((version) => (
           <span key={version}>
             {version} ({versions[version]})
@@ -92,10 +105,12 @@ export default function ModuleInfo() {
                 <List>
                   {locations[locationPath] &&
                     locations[locationPath].actions &&
-                    locations[locationPath].actions.map((suggestion, k) => {
+                    locations[locationPath].actions.map(([suggestion, action], k) => {
                       return (
                         <ListItem divider={true} key={k}>
-                          <ListItemText primary={suggestion.message} />
+                          <ListItemText
+                            primary={action.message}
+                            secondary={`Suggestion Name: ${suggestion.name}`} />
                         </ListItem>
                       );
                     })}

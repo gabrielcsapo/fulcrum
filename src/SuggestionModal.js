@@ -3,11 +3,6 @@ import { useParams, Link as RouterLink, useHistory } from "react-router-dom";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import Link from "@material-ui/core/Link";
-import Divider from "@material-ui/core/Divider";
-import Avatar from "@material-ui/core/Avatar";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import SearchIcon from "@material-ui/icons/Search";
 import InputBase from "@material-ui/core/InputBase";
 
@@ -25,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     position: "absolute",
-    width: "50%",
+    width: "75%",
     backgroundColor: theme.palette.background.paper,
     border: "2px solid #000",
     boxShadow: theme.shadows[5],
@@ -95,9 +90,6 @@ export default function SuggestionModal() {
   const [searchTerm, setSearchTerm] = React.useState("");
 
   const { id: suggestionId } = useParams();
-
-  console.log(suggestionId);
-
   const { suggestions } = report;
 
   const selectedSuggestion = suggestions.find(
@@ -144,7 +136,15 @@ export default function SuggestionModal() {
                   })
                   .map((action, i) => (
                     <TableRow key={i}>
-                      <TableCell align="left">{action.meta.name}</TableCell>
+                      <TableCell align="left">
+                        <Link
+                          component={RouterLink}
+                          to={`/dependencies/${encodeURIComponent(action.meta.name)}`}
+                        >
+                          {action.meta.name}
+                        </Link>{" "}
+
+                      </TableCell>
                       <TableCell align="left">{action.message}</TableCell>
                     </TableRow>
                   ))}

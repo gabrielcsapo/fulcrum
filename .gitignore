@@ -106,3 +106,4 @@ dist
 
 # Random
 .DS_Store
+.vscode
