@@ -51,7 +51,7 @@ function TopLevelDepCost() {
       <Typography variant="body1" component="p" style={{ paddingTop: 20 }}>
         Out of the {Object.keys(topLevelDeps).length} top level dependencies.
         The top {topLevelCosts.length.toLocaleString()} with the most
-        suggestions are;
+        suggestions are:
       </Typography>
       <ul>
         {topLevelCosts.map((dep, i) => {
