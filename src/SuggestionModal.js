@@ -139,11 +139,12 @@ export default function SuggestionModal() {
                       <TableCell align="left">
                         <Link
                           component={RouterLink}
-                          to={`/dependencies/${encodeURIComponent(action.meta.name)}`}
+                          to={`/dependencies/${encodeURIComponent(
+                            action.meta.name
+                          )}`}
                         >
                           {action.meta.name}
                         </Link>{" "}
-
                       </TableCell>
                       <TableCell align="left">{action.message}</TableCell>
                     </TableRow>
