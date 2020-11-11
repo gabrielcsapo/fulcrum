@@ -9,8 +9,34 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
+
+function ModuleInfoHeader(props) {
+  const { packageInfo } = props;
+  const homepageUrl =
+    (packageInfo.homepage && packageInfo.homepage.url) || packageInfo.homepage;
+  const fundingUrl =
+    (packageInfo.funding && packageInfo.funding.url) || packageInfo.funding;
+
+  return (
+    <div>
+      <h3>{packageInfo.name}</h3>
+      <pre style={{ whiteSpace: "break-spaces" }}>
+        {packageInfo.description}
+      </pre>
+      {homepageUrl && (
+        <h4>
+          Homepage: <a href={homepageUrl}>{homepageUrl}</a>
+        </h4>
+      )}
+      {fundingUrl && (
+        <h4>
+          Funding: <a href={fundingUrl}>{fundingUrl}</a>
+        </h4>
+      )}
+    </div>
+  );
+}
 
 export default function ModuleInfo() {
   const { id } = useParams();
@@ -65,10 +91,7 @@ export default function ModuleInfo() {
 
   return (
     <div>
-      <h3>{name}</h3>
-      <pre>{topLevelPackage.packageInfo.description}</pre>
-      {topLevelPackage.packageInfo.homepage && <h4>Homepage: <a href={topLevelPackage.packageInfo.homepage}>{topLevelPackage.packageInfo.homepage}</a></h4>}
-      {topLevelPackage.packageInfo.funding && <h4>Funding: <a href={topLevelPackage.packageInfo.funding}>{topLevelPackage.packageInfo.funding}</a></h4>}
+      <ModuleInfoHeader packageInfo={topLevelPackage.packageInfo} />
       <h4>Latest: {latestPackages[name]}</h4>
       <div>
         <i>Versions: </i>
@@ -105,15 +128,18 @@ export default function ModuleInfo() {
                 <List>
                   {locations[locationPath] &&
                     locations[locationPath].actions &&
-                    locations[locationPath].actions.map(([suggestion, action], k) => {
-                      return (
-                        <ListItem divider={true} key={k}>
-                          <ListItemText
-                            primary={action.message}
-                            secondary={`Suggestion Name: ${suggestion.name}`} />
-                        </ListItem>
-                      );
-                    })}
+                    locations[locationPath].actions.map(
+                      ([suggestion, action], k) => {
+                        return (
+                          <ListItem divider={true} key={k}>
+                            <ListItemText
+                              primary={action.message}
+                              secondary={`Suggestion Name: ${suggestion.name}`}
+                            />
+                          </ListItem>
+                        );
+                      }
+                    )}
                 </List>
               </AccordionDetails>
             </Accordion>

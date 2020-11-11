@@ -73,7 +73,6 @@ function TopLevelDepCost() {
 }
 
 export default function QuickInfo() {
-  const history = useHistory();
   const classes = useStyles();
 
   const { package: _package, dependencies, suggestions } = report;
