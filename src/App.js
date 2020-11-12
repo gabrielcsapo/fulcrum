@@ -3,12 +3,10 @@ import {
   Switch,
   Route,
   Link as RouterLink,
-  useParams,
-  useHistory,
   withRouter,
 } from "react-router-dom";
 import clsx from "clsx";
-import { makeStyles, withStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Box from "@material-ui/core/Box";
 import AppBar from "@material-ui/core/AppBar";

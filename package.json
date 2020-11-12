@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint .storybook/**/*.js stories/**/*.js bin/**/*.js lib/**/*.js src/**/*.js",
+    "lint": "eslint .eslintrc .storybook/**/*.js stories/**/*.js bin/**/*.js lib/**/*.js src/**/*.js",
     "storybook": "start-storybook -p 6006",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
