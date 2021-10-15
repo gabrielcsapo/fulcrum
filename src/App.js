@@ -184,7 +184,7 @@ class App extends Component {
                 {"Copyright © "}
                 <Link
                   color="inherit"
-                  href="https://github.com/gabrielcsapo/fulcrum"
+                  href="https://github.com/gabrielcsapo/module-detective"
                 >
                   Fulcrum
                 </Link>{" "}

@@ -3,7 +3,7 @@
 const path = require("path");
 const yargs = require("yargs");
 const ora = require("ora");
-const debug = require("debug")("fulcrum");
+const debug = require("debug")("module-detective");
 const fs = require("fs");
 const Arborist = require("@npmcli/arborist");
 
@@ -61,7 +61,7 @@ const cwd = path.resolve(process.cwd(), argv.path);
     const report = await generateReport(dependencyTree);
 
     if (argv.report) {
-      const reportPath = path.resolve(cwd, "fulcrum", "index.html");
+      const reportPath = path.resolve(cwd, "report", "index.html");
 
       if (process.env.DEV_FULCRUM) {
         changeStatus(`Dev server starting`);
@@ -75,7 +75,7 @@ const cwd = path.resolve(process.cwd(), argv.path);
         progress.succeed();
       }
     } else {
-      const reportPath = path.resolve(cwd, "fulcrum", "report.json");
+      const reportPath = path.resolve(cwd, "report", "report.json");
 
       try {
         fs.mkdirSync(reportPath, { recursive: true });

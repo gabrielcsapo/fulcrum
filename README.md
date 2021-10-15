@@ -1,9 +1,11 @@
-# fulcrum
+# module-detective
+
+> Node module analytics tool to help figure out how your dependencies are affecting you 🖲
 
 ## Installation
 
 ```
-npm install fulcrum
+npm install module-detective --save-dev
 ```
 
 ## Usage
@@ -19,5 +21,5 @@ Options:
                                                                          [array]
   --report   Generate html report                     [boolean] [default: false]
   --path     The path to run fulcum against
-                           [string] [default: "/Users/gcsapo/Documents/fulcrum"]
+                           [string] [default: "/Users/gcsapo/Documents/module-detective"]
 ```
