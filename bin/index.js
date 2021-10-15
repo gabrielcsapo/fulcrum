@@ -78,7 +78,7 @@ const cwd = path.resolve(process.cwd(), argv.path);
       const reportPath = path.resolve(cwd, "report", "report.json");
 
       try {
-        fs.mkdirSync(reportPath, { recursive: true });
+        fs.mkdirSync(path.dirname(reportPath), { recursive: true });
       } catch (ex) {
         debug(ex.message);
       }
