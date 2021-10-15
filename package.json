@@ -22,7 +22,7 @@
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@nivo/pie": "^0.74.0",
     "@nivo/treemap": "^0.74.0",
-    "@npmcli/arborist": "^4.0.1",
+    "@npmcli/arborist": "^1.0.3",
     "babel-loader": "^8.2.2",
     "babel-minify-webpack-plugin": "^0.3.1",
     "chalk": "^4.1.2",
@@ -40,7 +40,7 @@
     "tiny-glob": "^0.2.9",
     "tmp": "^0.2.1",
     "webpack": "^5.58.2",
-    "webpack-dev-server": "^4.3.1",
+    "webpack-dev-server": "^3.11.0",
     "yargs": "^17.2.1"
   },
   "devDependencies": {
