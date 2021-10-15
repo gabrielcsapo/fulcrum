@@ -127,7 +127,7 @@ class App extends Component {
               noWrap
               className={classes.title}
             >
-              Fulcrum
+              Module Detective
             </Typography>
 
             <Link
@@ -186,7 +186,7 @@ class App extends Component {
                   color="inherit"
                   href="https://github.com/gabrielcsapo/module-detective"
                 >
-                  Fulcrum
+                  Module Detective
                 </Link>{" "}
                 {new Date().getFullYear()}
                 {"."}

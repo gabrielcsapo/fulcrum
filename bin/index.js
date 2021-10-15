@@ -63,14 +63,14 @@ const cwd = path.resolve(process.cwd(), argv.path);
     if (argv.report) {
       const reportPath = path.resolve(cwd, "report", "index.html");
 
-      if (process.env.DEV_FULCRUM) {
+      if (process.env.DEV_SERVER) {
         changeStatus(`Dev server starting`);
         progress.succeed();
       }
 
       await Report(report);
 
-      if (!process.env.DEV_FULCRUM) {
+      if (!process.env.DEV_SERVER) {
         changeStatus(`HTML Report was built to ${reportPath}`);
         progress.succeed();
       }
