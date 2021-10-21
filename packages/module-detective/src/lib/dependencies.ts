@@ -7,7 +7,13 @@ import semverDiff from "semver/functions/diff";
 import { promisify } from "util";
 
 import { humanFileSize } from "./utils";
-import { IAction, IActionMeta, IDependency, IReport, ISuggestion } from "../types";
+import {
+  IAction,
+  IActionMeta,
+  IDependency,
+  IReport,
+  ISuggestion,
+} from "../types";
 
 const log = debug("module-detective");
 const copyFile = promisify(fs.copyFile);
@@ -203,7 +209,11 @@ function topLevelDepsFreshness(
     dependencyTree.package.dependencies || {}
   );
   const totalDeps = Object.keys(dependencies).length;
-  const outOfDate: { major: IVersionMeta[], minor: IVersionMeta[], patch: IVersionMeta[] } = { major: [], minor: [], patch: [] };
+  const outOfDate: {
+    major: IVersionMeta[];
+    minor: IVersionMeta[];
+    patch: IVersionMeta[];
+  } = { major: [], minor: [], patch: [] };
 
   for (const dependency in dependencies) {
     try {
@@ -360,7 +370,11 @@ function nestedDependencyFreshness(
   dependencyTree: any,
   latestPackages: any
 ): ISuggestion {
-  const outOfDate: { major: any[], minor: any[], patch: any[] } = { major: [], minor: [], patch: [] };
+  const outOfDate: { major: any[]; minor: any[]; patch: any[] } = {
+    major: [],
+    minor: [],
+    patch: [],
+  };
   let totalDeps = 0;
 
   for (const node of dependencyTree.inventory.values()) {
@@ -398,7 +412,7 @@ function nestedDependencyFreshness(
         breadcrumb,
       },
     });
-  })
+  });
 
   outOfDate.minor.map((node) => {
     const { name, version, path } = node;
@@ -423,7 +437,7 @@ function nestedDependencyFreshness(
         directory: path,
         breadcrumb,
       },
-    })
+    });
   });
 
   return {
@@ -483,7 +497,7 @@ async function getLatestPackages(dependencyTree: any): Promise<any> {
     await exec("npm outdated --json", {
       cwd: tmpobj.name,
     });
-  } catch (ex: any){
+  } catch (ex: any) {
     const packageData = JSON.parse(ex.stdout.toString("utf8"));
     for (const packageName in packageData) {
       latestPackages[packageName] = packageData[packageName].latest;
@@ -498,12 +512,12 @@ async function getLatestPackages(dependencyTree: any): Promise<any> {
 async function generateReport(dependencyTree: any): Promise<IReport> {
   const latestPackages = await getLatestPackages(dependencyTree);
 
-  const dependencies: [string, IDependency][] = [] 
-  
-  if(dependencyTree.inventory.entries) {
+  const dependencies: [string, IDependency][] = [];
+
+  if (dependencyTree.inventory.entries) {
     [...dependencyTree.inventory.entries()].forEach((entry: any) => {
       const dependencyInfo = entry[1];
-  
+
       dependencyInfo.breadcrumb = getBreadcrumb(entry[1]);
       dependencyInfo.size = getDirectorySize({
         directory: dependencyInfo.path,
@@ -515,9 +529,9 @@ async function generateReport(dependencyTree: any): Promise<IReport> {
           "utf8"
         )
       );
-  
-      dependencies.push([entry[0], dependencyInfo])
-    })
+
+      dependencies.push([entry[0], dependencyInfo]);
+    });
   }
 
   return {
@@ -537,4 +551,3 @@ async function generateReport(dependencyTree: any): Promise<IReport> {
 module.exports = {
   generateReport,
 };
-

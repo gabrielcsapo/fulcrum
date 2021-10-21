@@ -7,7 +7,7 @@ const WebpackDevServer = require("webpack-dev-server");
 
 import { IReport } from "../types";
 
-module.exports = (report: IReport, options: { outputDir: string}) => {
+module.exports = (report: IReport, options: { outputDir: string }) => {
   const { outputDir } = options;
   return new Promise((resolve, reject) => {
     const outputFile = path.resolve(outputDir, "index.html");
@@ -24,7 +24,7 @@ module.exports = (report: IReport, options: { outputDir: string}) => {
     );
 
     const compiler = webpack({
-      entry: require.resolve('module-detective-ui'),
+      entry: require.resolve("module-detective-ui"),
       context: path.resolve(__dirname, ".."),
       output: {
         path: outputDir,
@@ -91,7 +91,7 @@ module.exports = (report: IReport, options: { outputDir: string}) => {
         new HtmlWebpackPlugin({
           filename: outputFile,
           inlineSource: ".(js|css|eot|woff2|woff|ttf|svg)$",
-          template: require.resolve('module-detective-ui/src/template.html'),
+          template: require.resolve("module-detective-ui/src/template.html"),
         }),
       ],
     });
