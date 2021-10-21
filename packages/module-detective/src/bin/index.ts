@@ -84,9 +84,9 @@ const outputDir = path.resolve(argv.outputDir);
       const reportPath = path.resolve(outputDir, "report.json");
 
       try {
-        fs.mkdirSync(outputDir, { recursive: true });
-      } catch (error: any) {
-        debug(error.message);
+        fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+      } catch (ex: any) {
+        debug(ex.message);
       }
 
       fs.writeFileSync(reportPath, JSON.stringify(report));
