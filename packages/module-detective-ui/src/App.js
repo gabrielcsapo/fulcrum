@@ -104,8 +104,7 @@ class App extends Component {
       location.state.modal &&
       this.previousLocation !== location;
 
-    // eslint-disable-next-line no-undef
-    const { suggestions, dependencies } = report;
+    const { suggestions } = report;
     const totalSuggestions = suggestions
       .map((suggestion) => suggestion.actions.length)
       .reduce((a, b) => a + b, 0);

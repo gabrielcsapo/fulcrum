@@ -20,16 +20,6 @@ function getHrTimeInSeconds(hrtime: [number, number]) {
 const { argv } = yargs
   .usage("Figure out how your dependencies are affecting you.")
   .options({
-    depth: {
-      describe: "The depth to show console output",
-      default: 20,
-      type: "integer",
-    },
-    find: {
-      describe:
-        "Find particular node_modules to find and get an understanding of",
-      type: "array",
-    },
     report: {
       describe: "Generate html report",
       default: false,

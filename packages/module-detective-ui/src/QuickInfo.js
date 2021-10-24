@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import * as React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
@@ -16,7 +15,6 @@ const useStyles = makeStyles(() => ({
 }));
 
 function TopLevelDepCost() {
-  // eslint-disable-next-line no-undef
   const { package: _package, suggestions } = report;
   const costs = {};
 
@@ -87,7 +85,7 @@ export default function QuickInfo() {
       <Grid container className={classes.root} spacing={2}>
         <Grid item xs={6}>
           <Typography style={{ padding: 20 }}>
-            The current project "{_package.name}" currently has{" "}
+            The current project &lsquo;{_package.name}&lsquo; currently has{" "}
             {Object.keys(topLevelDeps).length.toLocaleString()} direct
             dependencies. As well as {dependencies.length.toLocaleString()}{" "}
             total sub dependencies. There are a total of{" "}
