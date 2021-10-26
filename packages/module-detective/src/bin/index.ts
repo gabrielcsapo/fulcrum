@@ -5,7 +5,6 @@ const yargs = require("yargs");
 const ora = require("ora");
 const debug = require("debug")("module-detective");
 const fs = require("fs");
-const Arborist = require("@npmcli/arborist");
 
 const Report = require("../lib/report");
 const { generateReport } = require("../lib/dependencies");
@@ -50,11 +49,8 @@ const cwd = path.resolve(process.cwd(), argv.path);
 const outputDir = path.resolve(argv.outputDir);
 
 (async function main() {
-  const arb = new Arborist({});
-
   try {
-    const dependencyTree = await arb.loadActual();
-    const report = await generateReport(dependencyTree);
+    const report = await generateReport(cwd);
 
     if (argv.report) {
       const reportPath = path.resolve(outputDir, "index.html");

@@ -1,7 +1,11 @@
 export interface IDependency {
+  name: string;
   breadcrumb: string;
   size: number;
+  location: string;
   packageInfo: any;
+  homepage?: any;
+  funding?: any;
 }
 
 export interface IActionMeta {
@@ -26,6 +30,6 @@ export interface ISuggestion {
 export interface IReport {
   latestPackages: any;
   package: any;
-  dependencies: [string, IDependency][];
+  dependencies: [string, Omit<IDependency, "packageInfo">][];
   suggestions: ISuggestion[];
 }

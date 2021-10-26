@@ -11,7 +11,7 @@ export default function Dashboard() {
     <div>
       <QuickInfo />
       <br />
-      <Grid container spacing={3} justify="center" alignItems="stretch">
+      <Grid container spacing={3} justifyContent="center" alignItems="stretch">
         {suggestions.map((suggestion, index) => {
           return (
             <Grid item xs={3} sm={3} key={index}>

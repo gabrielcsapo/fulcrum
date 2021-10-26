@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint src",
-    "build": "tsc --project tsconfig.json && npm run docs",
+    "build": "tsc --project tsconfig.json",
     "docs": "./bin/index.js --report --outputDir=../../docs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,7 +18,7 @@
     "@babel/core": "^7.15.8",
     "@babel/preset-env": "^7.15.8",
     "@babel/preset-react": "^7.14.5",
-    "@npmcli/arborist": "^1.0.3",
+    "@npmcli/arborist": "^4.0.2",
     "babel-loader": "^8.2.2",
     "chalk": "^4.1.2",
     "module-detective-ui": "0.0.0",
@@ -28,7 +28,6 @@
     "prettier": "^2.4.1",
     "semver": "^7.3.5",
     "style-loader": "^3.3.0",
-    "tiny-each-async": "^2.0.3",
     "tiny-glob": "^0.2.9",
     "tmp": "^0.2.1",
     "webpack": "^5.58.2",

@@ -15,6 +15,8 @@ import {
   ISuggestion,
 } from "../types";
 
+const Arborist = require("@npmcli/arborist");
+
 const log = debug("module-detective");
 const copyFile = promisify(fs.copyFile);
 const writeFile = promisify(fs.writeFile);
@@ -75,6 +77,20 @@ function getAllFiles(
   return _arrayOfFiles;
 }
 
+function getEntries(dependencyTree: any): any[] {
+  // ignore the root node
+  return [...dependencyTree.inventory.entries()].filter(
+    (entry) => entry[0] !== ""
+  );
+}
+
+function getValues(dependencyTree: any): any[] {
+  // ignore the root node
+  return [...dependencyTree.inventory.values()].filter(
+    (node) => node.location !== ""
+  );
+}
+
 function getDirectorySize({
   directory,
   exclude,
@@ -93,7 +109,7 @@ function getDirectorySize({
 function packagesWithPinnedVersions(dependencyTree: any): ISuggestion {
   const packagedWithPinned = [];
 
-  for (const node of dependencyTree.inventory.values()) {
+  for (const node of getValues(dependencyTree)) {
     const breadcrumb = getBreadcrumb(node);
 
     for (const dependencyName in node.packageInfo.dependencies || {}) {
@@ -137,7 +153,7 @@ function packagesWithPinnedVersions(dependencyTree: any): ISuggestion {
 function packagesWithExtraArtifacts(dependencyTree: any): ISuggestion {
   const extraArtifacts = [];
 
-  for (const node of dependencyTree.inventory.values()) {
+  for (const node of getValues(dependencyTree)) {
     const breadcrumb = getBreadcrumb(node);
 
     if (fs.existsSync(path.resolve(node.path, "docs"))) {
@@ -218,7 +234,7 @@ function topLevelDepsFreshness(
   for (const dependency in dependencies) {
     try {
       const topLevelPackagePath = "node_modules/" + dependency;
-      const topLevelPackage = [...dependencyTree.inventory.values()].find(
+      const topLevelPackage = [...getValues(dependencyTree)].find(
         (dependency) => dependency.location === topLevelPackagePath
       );
       const breadcrumb = getBreadcrumb(topLevelPackage);
@@ -317,7 +333,7 @@ function topLevelDepsFreshness(
 function notBeingAbsorbedByTopLevel(dependencyTree: any): ISuggestion {
   const notAbsorbed = [];
 
-  for (const node of dependencyTree.inventory.values()) {
+  for (const node of getValues(dependencyTree)) {
     const topLevelPath = `node_modules/${node.name}`;
 
     // don't count dependencies that are topLevel dependencies
@@ -377,7 +393,7 @@ function nestedDependencyFreshness(
   };
   let totalDeps = 0;
 
-  for (const node of dependencyTree.inventory.values()) {
+  for (const node of getValues(dependencyTree)) {
     totalDeps += 1;
 
     try {
@@ -463,7 +479,7 @@ async function getLatestPackages(dependencyTree: any): Promise<any> {
   // TODO: this should be cached for faster build times and not having to make large requests to NPM
   const fakePackageJson: { dependencies: any } = { dependencies: {} };
 
-  const dependencyKeys = [...dependencyTree.inventory.entries()]
+  const dependencyKeys = getEntries(dependencyTree)
     .filter(([, node]) => {
       // ignore linked packages and packages that have realpaths that are on disk (which means they are linked and potentially don't exist in the registry)
       return !node.isLink && node.realpath.includes("node_modules");
@@ -509,16 +525,22 @@ async function getLatestPackages(dependencyTree: any): Promise<any> {
   return latestPackages;
 }
 
-async function generateReport(dependencyTree: any): Promise<IReport> {
+async function generateReport(cwd: string): Promise<IReport> {
+  const arb = new Arborist({});
+  const dependencyTree = await arb.loadActual();
   const latestPackages = await getLatestPackages(dependencyTree);
 
-  const dependencies: [string, IDependency][] = [];
+  const dependencies: [string, Omit<IDependency, "packageInfo">][] = [];
 
   if (dependencyTree.inventory.entries) {
-    [...dependencyTree.inventory.entries()].forEach((entry: any) => {
+    getEntries(dependencyTree).forEach((entry: any) => {
       const dependencyInfo = entry[1];
 
+      const pathToDependencyOnDisk = path
+        .resolve(entry[0])
+        .replace(path.resolve(cwd) + "/", "");
       dependencyInfo.breadcrumb = getBreadcrumb(entry[1]);
+      dependencyInfo.location = pathToDependencyOnDisk;
       dependencyInfo.size = getDirectorySize({
         directory: dependencyInfo.path,
         exclude: new RegExp(path.resolve(dependencyInfo.path, "node_modules")),
@@ -530,7 +552,17 @@ async function generateReport(dependencyTree: any): Promise<IReport> {
         )
       );
 
-      dependencies.push([entry[0], dependencyInfo]);
+      dependencies.push([
+        pathToDependencyOnDisk,
+        {
+          name: dependencyInfo.name,
+          breadcrumb: dependencyInfo.breadcrumb,
+          location: dependencyInfo.location,
+          size: dependencyInfo.size,
+          homepage: dependencyInfo.homepage,
+          funding: dependencyInfo.funding,
+        },
+      ]);
     });
   }
 
