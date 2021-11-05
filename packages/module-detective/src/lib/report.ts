@@ -86,6 +86,8 @@ module.exports = (report: IReport, options: { outputDir: string }) => {
           "process.env": {
             NODE_ENV: JSON.stringify(process.env.NODE_ENV || "development"),
           },
+          // actually bundle the report as a global variable
+          // TODO: report is 20MB, it should be split up, and webpack should do that for us
           report: JSON.stringify(report),
         }),
         new HtmlWebpackPlugin({
@@ -97,6 +99,7 @@ module.exports = (report: IReport, options: { outputDir: string }) => {
     });
 
     if (process.env.DEV_SERVER) {
+      // don't actually generate the bundle on disk
       const msf = new MemoryFileSystem();
       compiler.outputFileSystem = msf;
 

@@ -114,6 +114,8 @@ function packagesWithPinnedVersions(dependencyTree: any): ISuggestion {
 
     for (const dependencyName in node.packageInfo.dependencies || {}) {
       if (
+        // might need to check the logic on this; "~" means "takes patches"
+        // check node-semver to see the logc
         node.packageInfo.dependencies[dependencyName].substring(0, 1) === "~"
       ) {
         try {
@@ -501,6 +503,7 @@ async function getLatestPackages(dependencyTree: any): Promise<any> {
 
   const latestPackages: any = {};
   try {
+    // need to keep the registry context for the fake package.json so things get resolved correctly when checking outdated
     await copyFile(
       path.resolve(process.cwd(), ".npmrc"),
       path.resolve(tmpobj.name, ".npmrc")
@@ -571,10 +574,19 @@ async function generateReport(cwd: string): Promise<IReport> {
     package: dependencyTree.package,
     dependencies,
     suggestions: [
+      // suggestion because doesn't allow you to collapse versions (you end up with copies of what could be the same thing)
       packagesWithPinnedVersions(dependencyTree),
+
+      // docs/ or tests/ is published to npm - how do you NOT publish them (use ignore file or package.json.files[]?
       packagesWithExtraArtifacts(dependencyTree),
+
+      // version range that doesn't satisfy the top level version range
       notBeingAbsorbedByTopLevel(dependencyTree),
+
+      // your dependencies have updatable dependencies (and how out of date; major, minor, patch)
       nestedDependencyFreshness(dependencyTree, latestPackages),
+
+      // name as nested, just top level
       topLevelDepsFreshness(dependencyTree, latestPackages),
     ],
   };
