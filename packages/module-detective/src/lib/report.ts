@@ -83,6 +83,12 @@ export default function Report(
           },
         ],
       },
+      optimization: {
+        runtimeChunk: "single",
+        splitChunks: {
+          chunks: "all",
+        },
+      },
       resolve: {
         extensions: [".js", ".json", ".jsx", ".css"],
         modules: [path.resolve(__dirname, "node_modules"), "node_modules"],
@@ -104,6 +110,7 @@ export default function Report(
     if (process.env.DEV_SERVER) {
       const server = new WebpackDevServer(
         {
+          // graciously writes the output to disk as an FYI (also totally lying b/c it won't work without this)
           devMiddleware: {
             writeToDisk: true,
           },
