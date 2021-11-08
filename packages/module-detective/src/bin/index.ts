@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-const path = require("path");
-const yargs = require("yargs");
-const ora = require("ora");
-const debug = require("debug")("module-detective");
-const fs = require("fs");
+import path from "path";
+import fs from "fs";
+import debug from "debug";
+import ora from "ora";
+import yargs from "yargs";
 
 const Report = require("../lib/report");
 const { generateReport } = require("../lib/dependencies");
