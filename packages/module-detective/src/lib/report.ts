@@ -117,9 +117,8 @@ export default function Report(
           compress: true,
           port: 8080,
           static: {
-            directory: outputDir,
+            directory: `./`,
             serveIndex: true,
-            publicPath: "/taco",
             watch: true,
           },
           client: {
@@ -129,9 +128,13 @@ export default function Report(
         compiler
       );
 
-      server.listen(8080, "127.0.0.1", () => {
+      server.startCallback(() => {
         console.log("Starting server on http://localhost:8080");
       });
+
+      /* server.listen(8080, "127.0.0.1", () => {
+        console.log("Starting server on http://localhost:8080");
+      }); */
     } else {
       compiler.run((error: any, stats: any) => {
         if (error || stats.errors) reject(error || stats.errors); // eslint-disable-line

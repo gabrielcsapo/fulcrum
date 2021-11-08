@@ -30,5 +30,5 @@
       "*": ["types/*"]
     }
   },
-  "include": ["src/*", "app/*"]
+  "include": ["src/**/*", "app/**/*"]
 }
