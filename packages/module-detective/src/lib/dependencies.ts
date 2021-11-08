@@ -528,7 +528,7 @@ async function getLatestPackages(dependencyTree: any): Promise<any> {
   return latestPackages;
 }
 
-async function generateReport(cwd: string): Promise<IReport> {
+export default async function generateReport(cwd: string): Promise<IReport> {
   const arb = new Arborist({});
   const dependencyTree = await arb.loadActual();
   const latestPackages = await getLatestPackages(dependencyTree);
@@ -591,7 +591,3 @@ async function generateReport(cwd: string): Promise<IReport> {
     ],
   };
 }
-
-module.exports = {
-  generateReport,
-};

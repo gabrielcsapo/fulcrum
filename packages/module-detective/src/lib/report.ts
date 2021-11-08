@@ -1,21 +1,23 @@
 import fs from "fs";
 import path from "path";
-import webpack, { Compiler } from "webpack";
-import MemoryFileSystem from "memory-fs";
+import webpack from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import WebpackDevServer from "webpack-dev-server";
 
 import { IReport } from "../types";
 
-module.exports = (report: IReport, options: { outputDir: string }) => {
+export default function Report(
+  report: IReport,
+  options: { outputDir: string }
+) {
   const { outputDir } = options;
   return new Promise((resolve, reject) => {
     const outputFile = path.resolve(outputDir, "index.html");
 
     try {
       fs.mkdirSync(outputDir, { recursive: true });
-    } catch (ex: any) {
-      console.log(ex.message);
+    } catch (ex: unknown) {
+      console.log((ex as NodeJS.ErrnoException).message);
     }
 
     fs.writeFileSync(
@@ -23,9 +25,9 @@ module.exports = (report: IReport, options: { outputDir: string }) => {
       JSON.stringify(report)
     );
 
-    let NODE_ENV: "development" | "production" = "development";
+    let _NODE_ENV: "development" | "production" = "development";
     if (process.env.NODE_ENV === "production") {
-      NODE_ENV = process.env.NODE_ENV as "production";
+      _NODE_ENV = process.env.NODE_ENV as "production";
     }
     const compiler = webpack({
       entry: require.resolve("module-detective-ui"),
@@ -33,9 +35,9 @@ module.exports = (report: IReport, options: { outputDir: string }) => {
       output: {
         path: outputDir,
         publicPath: "./",
-        filename: "bundle.js",
+        filename: "[name].bundle.js",
       },
-      mode: NODE_ENV,
+      mode: _NODE_ENV,
       module: {
         rules: [
           {
@@ -87,9 +89,6 @@ module.exports = (report: IReport, options: { outputDir: string }) => {
       },
       plugins: [
         new webpack.DefinePlugin({
-          "process.env": {
-            NODE_ENV,
-          },
           // actually bundle the report as a global variable
           // TODO: report is 20MB, it should be split up, and webpack should do that for us
           report: JSON.stringify(report),
@@ -103,21 +102,28 @@ module.exports = (report: IReport, options: { outputDir: string }) => {
     });
 
     if (process.env.DEV_SERVER) {
-      // don't actually generate the bundle on disk
-      const msf = new MemoryFileSystem();
-      compiler.outputFileSystem = msf;
-
       const server = new WebpackDevServer(
         {
+          devMiddleware: {
+            writeToDisk: true,
+          },
           hot: true,
           historyApiFallback: true,
           compress: true,
           port: 8080,
+          static: {
+            directory: outputDir,
+            serveIndex: true,
+            watch: true,
+          },
+          client: {
+            overlay: true,
+          },
         },
         compiler
       );
 
-      server.listen(8080, "127.0.0.1", () => {
+      server.startCallback(() => {
         console.log("Starting server on http://localhost:8080");
       });
     } else {
@@ -128,4 +134,4 @@ module.exports = (report: IReport, options: { outputDir: string }) => {
       });
     }
   });
-};
+}

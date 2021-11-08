@@ -6,8 +6,8 @@ import debug from "debug";
 import ora from "ora";
 import yargs from "yargs";
 
-const Report = require("../lib/report");
-const { generateReport } = require("../lib/dependencies");
+import Report from "../lib/report";
+import generateReport from "../lib/dependencies";
 
 function getHrTimeInSeconds(hrtime: [number, number]) {
   const end = process.hrtime(hrtime);
