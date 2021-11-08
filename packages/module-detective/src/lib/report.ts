@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import webpack from "webpack";
-import MemoryFileSystem from "memory-fs";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import WebpackDevServer from "webpack-dev-server";
 
@@ -36,7 +35,7 @@ export default function Report(
       output: {
         path: outputDir,
         publicPath: "./",
-        filename: "bundle.js",
+        filename: "[name].bundle.js",
       },
       mode: _NODE_ENV,
       module: {
@@ -90,9 +89,6 @@ export default function Report(
       },
       plugins: [
         new webpack.DefinePlugin({
-          "process.env": {
-            NODE_ENV: _NODE_ENV,
-          },
           // actually bundle the report as a global variable
           // TODO: report is 20MB, it should be split up, and webpack should do that for us
           report: JSON.stringify(report),
@@ -106,17 +102,20 @@ export default function Report(
     });
 
     if (process.env.DEV_SERVER) {
-      // don't actually generate the bundle on disk
-      // commenting out for debugging
-      // const msf = new MemoryFileSystem();
-      // compiler.outputFileSystem = msf;
-
       const server = new WebpackDevServer(
         {
+          devMiddleware: {
+            writeToDisk: true,
+          },
           hot: true,
           historyApiFallback: true,
           compress: true,
           port: 8080,
+          static: {
+            directory: outputDir,
+            serveIndex: true,
+            watch: true,
+          },
           client: {
             overlay: true,
           },
@@ -127,10 +126,6 @@ export default function Report(
       server.startCallback(() => {
         console.log("Starting server on http://localhost:8080");
       });
-
-      /* server.listen(8080, "127.0.0.1", () => {
-        console.log("Starting server on http://localhost:8080");
-      }); */
     } else {
       compiler.run((error: any, stats: any) => {
         if (error || stats.errors) reject(error || stats.errors); // eslint-disable-line
