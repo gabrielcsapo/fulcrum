@@ -22,7 +22,7 @@ Options:
 ```
 
 ### Getting Started 
-1. `yarn`
+1. `npm install`
 2. `./node_modules/.bin/lerna bootstrap` (or install lerna globally)
 
 ### Self Analysis
