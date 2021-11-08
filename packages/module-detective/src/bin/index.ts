@@ -17,7 +17,7 @@ function getHrTimeInSeconds(hrtime: [number, number]) {
 }
 
 const { argv } = yargs
-  .usage("Figure out how your dependencies are affecting you.")
+  .usage("See how your dependencies are affecting your project.")
   .options({
     report: {
       describe: "Generate html report",
