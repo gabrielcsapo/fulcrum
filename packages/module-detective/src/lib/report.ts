@@ -107,8 +107,9 @@ export default function Report(
 
     if (process.env.DEV_SERVER) {
       // don't actually generate the bundle on disk
-      const msf = new MemoryFileSystem();
-      compiler.outputFileSystem = msf;
+      // commenting out for debugging
+      // const msf = new MemoryFileSystem();
+      // compiler.outputFileSystem = msf;
 
       const server = new WebpackDevServer(
         {
@@ -116,11 +117,6 @@ export default function Report(
           historyApiFallback: true,
           compress: true,
           port: 8080,
-          static: {
-            directory: `./`,
-            serveIndex: true,
-            watch: true,
-          },
           client: {
             overlay: true,
           },
