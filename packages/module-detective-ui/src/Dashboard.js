@@ -1,15 +1,15 @@
 import * as React from "react";
-import Grid from "@material-ui/core/Grid";
+import Grid from "@mui/material/Grid";
 
 import SuggestionCard from "./SuggestionCard";
 import QuickInfo from "./QuickInfo";
 
-export default function Dashboard() {
-  const { suggestions } = report;
+export default function Dashboard(props) {
+  const { suggestions } = props.report;
 
   return (
     <div>
-      <QuickInfo />
+      <QuickInfo report={props.report} />
       <br />
       <Grid container spacing={3} justifyContent="center" alignItems="stretch">
         {suggestions.map((suggestion, index) => {

@@ -1,18 +1,19 @@
 import * as React from "react";
 import { useParams, Link as RouterLink, useHistory } from "react-router-dom";
-import { alpha, makeStyles } from "@material-ui/core/styles";
-import Modal from "@material-ui/core/Modal";
-import Link from "@material-ui/core/Link";
-import SearchIcon from "@material-ui/icons/Search";
-import InputBase from "@material-ui/core/InputBase";
+import { alpha } from "@mui/material/styles";
+import makeStyles from "@mui/styles/makeStyles";
+import Modal from "@mui/material/Modal";
+import Link from "@mui/material/Link";
+import SearchIcon from "@mui/icons-material/Search";
+import InputBase from "@mui/material/InputBase";
 
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,6 +27,10 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
   },
   search: {
+    display: "flex",
+    marginTop: theme.spacing(1),
+    alignContent: "center",
+    alignItems: "center",
     position: "relative",
     borderRadius: theme.shape.borderRadius,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -41,9 +46,8 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   searchIcon: {
-    padding: theme.spacing(0, 2),
+    padding: theme.spacing(0, 1),
     height: "100%",
-    position: "absolute",
     pointerEvents: "none",
     display: "flex",
     alignItems: "center",
@@ -54,8 +58,6 @@ const useStyles = makeStyles((theme) => ({
   },
   inputInput: {
     padding: theme.spacing(2),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
     transition: theme.transitions.create("width"),
     width: "100%",
     [theme.breakpoints.up("md")]: {
@@ -83,14 +85,14 @@ function getModalStyle() {
   };
 }
 
-export default function SuggestionModal() {
+export default function SuggestionModal(props) {
   const history = useHistory();
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
   const [searchTerm, setSearchTerm] = React.useState("");
 
   const { id: suggestionId } = useParams();
-  const { suggestions } = report;
+  const { suggestions = [] } = props.report || {};
 
   const selectedSuggestion = suggestions.find(
     (suggestion) => suggestion.id === suggestionId

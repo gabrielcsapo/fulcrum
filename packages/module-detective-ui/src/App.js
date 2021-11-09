@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import {
   Switch,
   Route,
@@ -6,26 +6,28 @@ import {
   withRouter,
 } from "react-router-dom";
 import clsx from "clsx";
-import { withStyles } from "@material-ui/core/styles";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import Box from "@material-ui/core/Box";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import DashboardIcon from "@material-ui/icons/Dashboard";
-import Badge from "@material-ui/core/Badge";
-import Typography from "@material-ui/core/Typography";
-import Container from "@material-ui/core/Container";
-import Link from "@material-ui/core/Link";
-import AccountTreeIcon from "@material-ui/icons/AccountTree";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
+import makeStyles from "@mui/styles/makeStyles";
+import withStyles from "@mui/styles/withStyles";
+
+import CssBaseline from "@mui/material/CssBaseline";
+import Box from "@mui/material/Box";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import Badge from "@mui/material/Badge";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import Link from "@mui/material/Link";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 
 import ModuleInfo from "./ModuleInfo";
 import ModuleExplorerList from "./ModuleExplorerList";
 import Dashboard from "./Dashboard";
 import SuggestionModal from "./SuggestionModal";
 
-const styles = (theme) => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
   },
@@ -73,7 +75,7 @@ const styles = (theme) => ({
     }),
     marginLeft: 0,
   },
-});
+}));
 
 const StyledBadge = withStyles((theme) => ({
   badge: {
@@ -84,118 +86,124 @@ const StyledBadge = withStyles((theme) => ({
   },
 }))(Badge);
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.previousLocation = this.props.location;
+function App(props) {
+  const classes = useStyles();
+  const [report, setReport] = React.useState();
+
+  React.useEffect(() => {
+    fetch("./report.json")
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setReport(data);
+      })
+      .catch((ex) => {
+        console.log(ex);
+      });
+  }, []);
+
+  if (!report) {
+    return <div>Loading Report...</div>;
   }
+  const { location } = props;
 
-  componentWillUpdate() {
-    const { location } = this.props;
-    if (!(location.state && location.state.modal)) {
-      this.previousLocation = this.props.location;
-    }
-  }
+  const { suggestions } = report;
+  const totalSuggestions = suggestions
+    .map((suggestion) => suggestion.actions.length)
+    .reduce((a, b) => a + b, 0);
 
-  render() {
-    const { classes, location } = this.props;
-    const isModal =
-      location.state &&
-      location.state.modal &&
-      this.previousLocation !== location;
-
-    const { suggestions } = report;
-    const totalSuggestions = suggestions
-      .map((suggestion) => suggestion.actions.length)
-      .reduce((a, b) => a + b, 0);
-
-    return (
-      <div className={classes.root}>
-        <CssBaseline />
-        <AppBar
-          position="absolute"
-          className={clsx(classes.appBar, {
-            [classes.appBarShift]: open,
-          })}
-        >
-          <Toolbar className={classes.toolbar}>
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              className={classes.title}
-            >
-              Module Detective
-            </Typography>
-
+  return (
+    <div className={classes.root}>
+      <CssBaseline />
+      <AppBar
+        position="absolute"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: open,
+        })}
+      >
+        <Toolbar className={classes.toolbar}>
+          <Typography
+            component="h1"
+            variant="h6"
+            color="inherit"
+            noWrap
+            className={classes.title}
+          >
             <Link
               component={RouterLink}
-              to={{
-                pathname: "/explorer",
-                state: { modal: true },
-              }}
+              color="inherit"
+              underline="none"
+              to="/"
             >
-              <Tooltip title="Modules" aria-label="modules">
-                <IconButton aria-label="modules">
-                  <AccountTreeIcon />
-                </IconButton>
-              </Tooltip>
+              Module Detective
             </Link>
-            <Link component={RouterLink} to="/">
-              <Tooltip title="Dashboard" aria-label="dashboard">
-                <IconButton aria-label="dashboard">
-                  <StyledBadge
-                    badgeContent={totalSuggestions}
-                    color="secondary"
-                  >
-                    <DashboardIcon />
-                  </StyledBadge>
-                </IconButton>
-              </Tooltip>
-            </Link>
-          </Toolbar>
-        </AppBar>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
-            <Switch location={isModal ? this.previousLocation : location}>
-              <Route exact={true} path="/">
-                <Dashboard />
-              </Route>
-              <Route path="/dependencies/:id">
-                <ModuleInfo />
-              </Route>
-            </Switch>
-            <Route
-              exact
-              path="/suggestion/:id"
-              render={() => <SuggestionModal />}
-            />
-            <Route
-              exact
-              path="/explorer"
-              render={() => <ModuleExplorerList />}
-            />
+          </Typography>
 
-            <Box pt={4}>
-              <Typography variant="body2" color="textSecondary" align="center">
-                {"Copyright © "}
-                <Link
-                  color="inherit"
-                  href="https://github.com/gabrielcsapo/module-detective"
-                >
-                  Module Detective
-                </Link>{" "}
-                {new Date().getFullYear()}
-                {"."}
-              </Typography>
-            </Box>
-          </Container>
-        </main>
-      </div>
-    );
-  }
+          <Link
+            component={RouterLink}
+            to={{
+              pathname: "/explorer",
+              state: { modal: true },
+            }}
+          >
+            <Tooltip title="Modules" aria-label="modules">
+              <IconButton aria-label="modules" size="large">
+                <AccountTreeIcon />
+              </IconButton>
+            </Tooltip>
+          </Link>
+          <Link component={RouterLink} to="/">
+            <Tooltip title="Dashboard" aria-label="dashboard">
+              <IconButton aria-label="dashboard" size="large">
+                <StyledBadge badgeContent={totalSuggestions} color="secondary">
+                  <DashboardIcon />
+                </StyledBadge>
+              </IconButton>
+            </Tooltip>
+          </Link>
+        </Toolbar>
+      </AppBar>
+      <main className={classes.content}>
+        <div className={classes.appBarSpacer} />
+        <Container maxWidth="lg" className={classes.container}>
+          <Switch location={location}>
+            <Route exact={true} path="/">
+              <Dashboard report={report} />
+            </Route>
+            <Route path="/dependencies/:id">
+              <ModuleInfo report={report} />
+            </Route>
+          </Switch>
+          <Route
+            exact
+            path="/suggestion/:id"
+            render={() => <SuggestionModal report={report} />}
+          />
+          <Route
+            exact
+            path="/explorer"
+            render={() => <ModuleExplorerList report={report} />}
+          />
+
+          <Box pt={4}>
+            <Typography variant="body2" color="textSecondary" align="center">
+              {"Copyright © "}
+              <Link
+                color="inherit"
+                href="https://github.com/gabrielcsapo/module-detective"
+              >
+                Module Detective
+              </Link>{" "}
+              {new Date().getFullYear()}
+              {"."}
+            </Typography>
+          </Box>
+        </Container>
+      </main>
+    </div>
+  );
 }
 
-export default withStyles(styles, { withTheme: true })(withRouter(App));
+export default withRouter(App);

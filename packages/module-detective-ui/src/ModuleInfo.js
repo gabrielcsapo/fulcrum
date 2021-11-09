@@ -1,15 +1,15 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import Breadcrumbs from "@material-ui/core/Breadcrumbs";
-import Typography from "@material-ui/core/Typography";
-import Avatar from "@material-ui/core/Avatar";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
 
 function ModuleInfoHeader(props) {
   const { packageInfo = {} } = props;
@@ -36,11 +36,11 @@ function ModuleInfoHeader(props) {
   );
 }
 
-export default function ModuleInfo() {
+export default function ModuleInfo(props) {
   const { id } = useParams();
   const name = decodeURIComponent(id);
 
-  const { dependencies, suggestions, latestPackages } = report;
+  const { dependencies, suggestions = [], latestPackages } = props.report || {};
 
   const versions = {};
   const locations = {};
