@@ -30,8 +30,9 @@
     "style-loader": "^3.3.0",
     "tiny-glob": "^0.2.9",
     "tmp": "^0.2.1",
+    "@statoscope/webpack-plugin": "^5.18.0",
     "webpack-dev-server": "^4.4.0",
-    "webpack": "^5.58.2",
+    "webpack": "^5.62.1",
     "yargs": "^17.2.1"
   },
   "devDependencies": {

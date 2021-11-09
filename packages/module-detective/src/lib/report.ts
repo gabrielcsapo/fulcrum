@@ -3,6 +3,7 @@ import path from "path";
 import webpack from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import WebpackDevServer from "webpack-dev-server";
+import StatoscopeWebpackPlugin from "@statoscope/webpack-plugin";
 
 import { IReport } from "../types";
 
@@ -70,6 +71,7 @@ export default function Report(
                 plugins: [
                   require.resolve("@babel/plugin-proposal-class-properties"),
                 ],
+                cacheCompression: true,
               },
             },
           },
@@ -87,6 +89,13 @@ export default function Report(
         runtimeChunk: "single",
         splitChunks: {
           chunks: "all",
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: "vendors",
+              chunks: "all",
+            },
+          },
         },
       },
       resolve: {
@@ -94,19 +103,14 @@ export default function Report(
         modules: [path.resolve(__dirname, "node_modules"), "node_modules"],
       },
       plugins: [
-        new webpack.DefinePlugin({
-          // actually bundle the report as a global variable
-          // TODO: report is 20MB, it should be split up, and webpack should do that for us
-          report: JSON.stringify(report),
-        }),
+        new StatoscopeWebpackPlugin(),
         new HtmlWebpackPlugin({
           filename: outputFile,
-          inlineSource: ".(js|css|eot|woff2|woff|ttf|svg)$",
           template: require.resolve("module-detective-ui/src/template.html"),
         }),
       ],
     });
-
+    console.log("dev server", process.env.DEV_SERVER);
     if (process.env.DEV_SERVER) {
       const server = new WebpackDevServer(
         {
@@ -134,8 +138,8 @@ export default function Report(
         console.log("Starting server on http://localhost:8080");
       });
     } else {
-      compiler.run((error: any, stats: any) => {
-        if (error || stats.errors) reject(error || stats.errors); // eslint-disable-line
+      compiler.run((error, stats) => {
+        if (error) reject(error); // eslint-disable-line
 
         resolve(stats);
       });

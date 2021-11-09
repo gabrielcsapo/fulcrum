@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { makeStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
-import Link from "@material-ui/core/Link";
+import makeStyles from "@mui/styles/makeStyles";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Link from "@mui/material/Link";
 
 import { humanFileSize } from "./utils";
 
@@ -14,13 +14,13 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-function TopLevelDepCost() {
-  const { package: _package, suggestions } = report;
+function TopLevelDepCost(props) {
   const costs = {};
+  const { package: _package, suggestions = [] } = props?.report || {};
 
   const topLevelDeps = [
-    ...Object.keys(_package.devDependencies || {}),
-    ...Object.keys(_package.dependencies || {}),
+    ...Object.keys(_package?.devDependencies || {}),
+    ...Object.keys(_package?.dependencies || {}),
   ];
 
   suggestions.forEach((suggestion) => {
@@ -69,15 +69,19 @@ function TopLevelDepCost() {
   );
 }
 
-export default function QuickInfo() {
+export default function QuickInfo(props) {
   const classes = useStyles();
 
-  const { package: _package, dependencies, suggestions } = report;
+  const {
+    package: _package,
+    dependencies = [],
+    suggestions = [],
+  } = props?.report || {};
 
   const topLevelDeps = Object.assign(
     {},
-    Object.assign({}, _package.devDependencies || {}),
-    _package.dependencies || {}
+    Object.assign({}, _package?.devDependencies || {}),
+    _package?.dependencies || {}
   );
 
   return (
@@ -85,7 +89,7 @@ export default function QuickInfo() {
       <Grid container className={classes.root} spacing={2}>
         <Grid item xs={6}>
           <Typography style={{ padding: 20 }}>
-            The current project &lsquo;{_package.name}&lsquo; currently has{" "}
+            The current project &lsquo;{_package?.name}&lsquo; currently has{" "}
             {Object.keys(topLevelDeps).length.toLocaleString()} direct
             dependencies. As well as {dependencies.length.toLocaleString()}{" "}
             total sub dependencies. There are a total of{" "}
@@ -102,7 +106,7 @@ export default function QuickInfo() {
           </Typography>
         </Grid>
         <Grid item xs={6}>
-          <TopLevelDepCost />
+          <TopLevelDepCost report={props?.report} />
         </Grid>
       </Grid>
     </Paper>

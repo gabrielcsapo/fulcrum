@@ -1,15 +1,16 @@
 import * as React from "react";
 import { Link as RouterLink, useHistory } from "react-router-dom";
-import { alpha, makeStyles } from "@material-ui/core/styles";
-import Modal from "@material-ui/core/Modal";
-import Link from "@material-ui/core/Link";
-import Divider from "@material-ui/core/Divider";
-import Avatar from "@material-ui/core/Avatar";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import SearchIcon from "@material-ui/icons/Search";
-import InputBase from "@material-ui/core/InputBase";
+import { alpha } from "@mui/material/styles";
+import makeStyles from "@mui/styles/makeStyles";
+import Modal from "@mui/material/Modal";
+import Link from "@mui/material/Link";
+import Divider from "@mui/material/Divider";
+import Avatar from "@mui/material/Avatar";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import SearchIcon from "@mui/icons-material/Search";
+import InputBase from "@mui/material/InputBase";
 
 import { FixedSizeList } from "react-window";
 
@@ -25,6 +26,10 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
   },
   search: {
+    display: "flex",
+    marginTop: theme.spacing(1),
+    alignContent: "center",
+    alignItems: "center",
     position: "relative",
     borderRadius: theme.shape.borderRadius,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -40,9 +45,8 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   searchIcon: {
-    padding: theme.spacing(0, 2),
+    padding: theme.spacing(0, 1),
     height: "100%",
-    position: "absolute",
     pointerEvents: "none",
     display: "flex",
     alignItems: "center",
@@ -53,8 +57,6 @@ const useStyles = makeStyles((theme) => ({
   },
   inputInput: {
     padding: theme.spacing(2),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
     transition: theme.transitions.create("width"),
     width: "100%",
     [theme.breakpoints.up("md")]: {
@@ -94,14 +96,14 @@ function renderRow(props) {
   );
 }
 
-export default function ModuleExplorerList() {
+export default function ModuleExplorerList(props) {
   const history = useHistory();
   const classes = useStyles();
   const [modalStyle] = React.useState(getModalStyle);
 
   const [searchTerm, setSearchTerm] = React.useState("");
 
-  const { suggestions } = report;
+  const { suggestions = [] } = props.report || {};
 
   const suggestionsGroupedByPackageMap = {};
 
