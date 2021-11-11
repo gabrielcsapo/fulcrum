@@ -1,21 +1,22 @@
 export type BasicJSON = Record<string, string>;
+export type DependenciesList = [string, IDependency][];
 
 // a very weak definition for https://github.com/npm/arborist/blob/48eb8fa01ea1cd1f89f47379b1ba4881a8bb9fbc/lib/node.js
-export interface ArboristNode {
-  children: Map<string, ArboristNode>;
+export interface IArboristNode {
+  children: Map<string, IArboristNode>;
   dev: boolean;
   devOptional: boolean;
   dummy: boolean;
-  edgesIn: Set<ArboristNode>;
-  edgesOut: Map<string, ArboristNode>;
+  edgesIn: Set<IArboristNode>;
+  edgesOut: Map<string, IArboristNode>;
   errors: Array<any>;
   extraneous: boolean;
-  fsChildren: Set<ArboristNode>;
+  fsChildren: Set<IArboristNode>;
   hasShrinkwrap: boolean;
   integrity: unknown | null;
-  inventory: Map<string, ArboristNode>;
+  inventory: Map<string, IArboristNode>;
   legacyPeerDeps: boolean;
-  linksIn: Set<ArboristNode>;
+  linksIn: Set<IArboristNode>;
   location: string;
   name: string;
   optional: boolean;
@@ -24,7 +25,7 @@ export interface ArboristNode {
   realpath: string;
   resolved: unknown | null;
   sourceReference: unknown | null;
-  tops: Set<ArboristNode>;
+  tops: Set<IArboristNode>;
   package: BasicJSON;
   packageName: string;
   isLink: boolean;
@@ -37,7 +38,6 @@ export interface IDependency {
   breadcrumb: string;
   size: number;
   location: string;
-  packageInfo: BasicJSON;
   // url to dependecy
   homepage?: string;
   // funding url
@@ -71,8 +71,8 @@ export interface ISuggestion {
 }
 
 export interface IReport {
-  latestPackages: any;
+  latestPackages: BasicJSON;
   package: BasicJSON;
-  dependencies: [string, Omit<IDependency, "packageInfo">][];
+  dependencies: DependenciesList;
   suggestions: ISuggestion[];
 }

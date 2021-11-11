@@ -10,11 +10,11 @@ import { humanFileSize } from "./utils";
 import {
   IAction,
   IVersionMeta,
-  IDependency,
   IReport,
   ISuggestion,
-  ArboristNode,
+  IArboristNode,
   BasicJSON,
+  DependenciesList,
 } from "../types";
 
 const Arborist = require("@npmcli/arborist");
@@ -76,7 +76,7 @@ function getAllFiles(
   return _arrayOfFiles;
 }
 
-function getEntries(dependencyTree: ArboristNode) {
+function getEntries(dependencyTree: IArboristNode) {
   // ignore the root node
   return [...dependencyTree.inventory.entries()].filter(
     (entry) => entry[0] !== ""
@@ -473,7 +473,7 @@ function nestedDependencyFreshness(
 }
 
 async function getLatestPackages(
-  dependencyTree: ArboristNode
+  dependencyTree: IArboristNode
 ): Promise<BasicJSON> {
   // TODO: this should be cached for faster build times and not having to make large requests to NPM
   const fakePackageJson: { dependencies: BasicJSON } = {
@@ -529,79 +529,33 @@ async function getLatestPackages(
 
 export default async function generateReport(cwd: string): Promise<IReport> {
   const arb = new Arborist({});
-  const dependencyTree: ArboristNode = await arb.loadActual();
+  const dependencyTree: IArboristNode = await arb.loadActual();
   const latestPackages = await getLatestPackages(dependencyTree);
 
-  const dependencies: [string, Omit<IDependency, "packageInfo">][] = [];
+  const dependencies: DependenciesList = [];
 
   if (dependencyTree.inventory.size) {
-    getEntries(dependencyTree).forEach((entry: any) => {
-      const dependencyInfo = entry[1];
-
-      const pathToDependencyOnDisk = path
-        .resolve(entry[0])
+    getEntries(dependencyTree).forEach(([entryPath, entryInfo]) => {
+      const location = path
+        .resolve(entryPath)
         .replace(path.resolve(cwd) + "/", "");
-      dependencyInfo.breadcrumb = getBreadcrumb(entry[1]);
-      dependencyInfo.location = pathToDependencyOnDisk;
-      dependencyInfo.size = getDirectorySize({
-        directory: dependencyInfo.path,
-        exclude: new RegExp(path.resolve(dependencyInfo.path, "node_modules")),
-      });
-      dependencyInfo.packageInfo = JSON.parse(
-        fs.readFileSync(
-          path.resolve(dependencyInfo.path, "package.json"),
-          "utf8"
-        )
-      );
 
       dependencies.push([
-        pathToDependencyOnDisk,
+        location,
         {
-          name: dependencyInfo.name,
-          breadcrumb: dependencyInfo.breadcrumb,
-          location: dependencyInfo.location,
-          size: dependencyInfo.size,
-          homepage: dependencyInfo.homepage,
-          funding: dependencyInfo.funding,
+          name: entryInfo.name,
+          breadcrumb: getBreadcrumb(entryInfo),
+          location,
+          size: getDirectorySize({
+            directory: entryInfo.path,
+            exclude: new RegExp(path.resolve(entryInfo.path, "node_modules")),
+          }),
+          homepage: entryInfo.homepage,
+          funding: entryInfo.funding,
         },
       ]);
     });
   }
-
-  /* if (dependencyTree.inventory.size) {
-    getEntries(dependencyTree).forEach((entry) => {
-      const entryInfo = entry[1];
-
-      const pathToDependencyOnDisk = path
-        .resolve(entry[0])
-        .replace(path.resolve(cwd) + "/", "");
-      const breadcrumb = getBreadcrumb(entry[1]);
-      const location = pathToDependencyOnDisk;
-      const size = getDirectorySize({
-        directory: entryInfo.path,
-        exclude: new RegExp(path.resolve(entryInfo.path, "node_modules")),
-      });
-
-      // This won't do at all...the functions expect the full tree plus the package Info...which is weird, shouldn't they have it?
-      // I see...he wants to add information to each, but it should have a reference to it, if necessary.
-      //
-      // I think only breadcrumb and size aren't part of the original node
-      //
-      const processedDependency: IDependency = {
-        name: entryInfo.name,
-        breadcrumb,
-        location,
-        size,
-        homepage: entryInfo.homepage,
-        funding: entryInfo.funding,
-        packageInfo: JSON.parse(
-          fs.readFileSync(path.resolve(entryInfo.path, "package.json"), "utf8")
-        ),
-      };
-
-      dependencies.push([pathToDependencyOnDisk, processedDependency]);
-    });
-  } */
 
   return {
     latestPackages,
