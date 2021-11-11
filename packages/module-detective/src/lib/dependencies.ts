@@ -2,9 +2,9 @@ import tmp from "tmp";
 import path from "path";
 import fs from "fs";
 import debug from "debug";
-import child_process from "child_process";
+import { exec } from "child_process";
 import semverDiff from "semver/functions/diff";
-import { promisify } from "util";
+import { copyFile, writeFile } from "fs/promises";
 
 import { humanFileSize } from "./utils";
 import {
@@ -18,9 +18,6 @@ import {
 const Arborist = require("@npmcli/arborist");
 
 const log = debug("module-detective");
-const copyFile = promisify(fs.copyFile);
-const writeFile = promisify(fs.writeFile);
-const exec = promisify(child_process.exec);
 
 function getBreadcrumb(node: any): string {
   const bread: string[] = [];

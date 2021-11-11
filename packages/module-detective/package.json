@@ -12,6 +12,9 @@
   "bin": {
     "detective": "./bin/index.js"
   },
+  "engines": {
+    "node": ">=14"
+  },
   "author": "Gabriel J. Csapo <gabecsapo@gmail.com>",
   "license": "ISC",
   "dependencies": {
