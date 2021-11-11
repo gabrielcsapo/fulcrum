@@ -9,10 +9,12 @@ import { copyFile, writeFile } from "fs/promises";
 import { humanFileSize } from "./utils";
 import {
   IAction,
-  IActionMeta,
+  IVersionMeta,
   IDependency,
   IReport,
   ISuggestion,
+  ArboristNode,
+  BasicJSON,
 } from "../types";
 
 const Arborist = require("@npmcli/arborist");
@@ -74,7 +76,7 @@ function getAllFiles(
   return _arrayOfFiles;
 }
 
-function getEntries(dependencyTree: any): any[] {
+function getEntries(dependencyTree: ArboristNode) {
   // ignore the root node
   return [...dependencyTree.inventory.entries()].filter(
     (entry) => entry[0] !== ""
@@ -109,11 +111,11 @@ function packagesWithPinnedVersions(dependencyTree: any): ISuggestion {
   for (const node of getValues(dependencyTree)) {
     const breadcrumb = getBreadcrumb(node);
 
-    for (const dependencyName in node.packageInfo.dependencies || {}) {
+    for (const dependencyName in node.package.dependencies || {}) {
       if (
         // might need to check the logic on this; "~" means "takes patches"
         // check node-semver to see the logc
-        node.packageInfo.dependencies[dependencyName].substring(0, 1) === "~"
+        node.package.dependencies[dependencyName].substring(0, 1) === "~"
       ) {
         try {
           const size = getDirectorySize({
@@ -122,7 +124,7 @@ function packagesWithPinnedVersions(dependencyTree: any): ISuggestion {
           });
 
           packagedWithPinned.push({
-            message: `"${node.name}" (${breadcrumb}) has a pinned version for ${dependencyName}@${node.packageInfo.dependencies[dependencyName]} that will never collapse.`,
+            message: `"${node.name}" (${breadcrumb}) has a pinned version for ${dependencyName}@${node.package.dependencies[dependencyName]} that will never collapse.`,
             meta: {
               breadcrumb,
               name: node.name,
@@ -208,10 +210,6 @@ function packagesWithExtraArtifacts(dependencyTree: any): ISuggestion {
     )}`,
     actions: extraArtifacts.sort((a, b) => b.meta.size - a.meta.size),
   };
-}
-
-interface IVersionMeta extends IActionMeta {
-  version: string;
 }
 
 function topLevelDepsFreshness(
@@ -474,9 +472,13 @@ function nestedDependencyFreshness(
   };
 }
 
-async function getLatestPackages(dependencyTree: any): Promise<any> {
+async function getLatestPackages(
+  dependencyTree: ArboristNode
+): Promise<BasicJSON> {
   // TODO: this should be cached for faster build times and not having to make large requests to NPM
-  const fakePackageJson: { dependencies: any } = { dependencies: {} };
+  const fakePackageJson: { dependencies: BasicJSON } = {
+    dependencies: {},
+  };
 
   const dependencyKeys = getEntries(dependencyTree)
     .filter(([, node]) => {
@@ -498,7 +500,7 @@ async function getLatestPackages(dependencyTree: any): Promise<any> {
     JSON.stringify(fakePackageJson)
   );
 
-  const latestPackages: any = {};
+  const latestPackages: BasicJSON = {};
   try {
     // need to keep the registry context for the fake package.json so things get resolved correctly when checking outdated
     await copyFile(
@@ -527,12 +529,12 @@ async function getLatestPackages(dependencyTree: any): Promise<any> {
 
 export default async function generateReport(cwd: string): Promise<IReport> {
   const arb = new Arborist({});
-  const dependencyTree = await arb.loadActual();
+  const dependencyTree: ArboristNode = await arb.loadActual();
   const latestPackages = await getLatestPackages(dependencyTree);
 
   const dependencies: [string, Omit<IDependency, "packageInfo">][] = [];
 
-  if (dependencyTree.inventory.entries) {
+  if (dependencyTree.inventory.size) {
     getEntries(dependencyTree).forEach((entry: any) => {
       const dependencyInfo = entry[1];
 
@@ -565,6 +567,41 @@ export default async function generateReport(cwd: string): Promise<IReport> {
       ]);
     });
   }
+
+  /* if (dependencyTree.inventory.size) {
+    getEntries(dependencyTree).forEach((entry) => {
+      const entryInfo = entry[1];
+
+      const pathToDependencyOnDisk = path
+        .resolve(entry[0])
+        .replace(path.resolve(cwd) + "/", "");
+      const breadcrumb = getBreadcrumb(entry[1]);
+      const location = pathToDependencyOnDisk;
+      const size = getDirectorySize({
+        directory: entryInfo.path,
+        exclude: new RegExp(path.resolve(entryInfo.path, "node_modules")),
+      });
+
+      // This won't do at all...the functions expect the full tree plus the package Info...which is weird, shouldn't they have it?
+      // I see...he wants to add information to each, but it should have a reference to it, if necessary.
+      //
+      // I think only breadcrumb and size aren't part of the original node
+      //
+      const processedDependency: IDependency = {
+        name: entryInfo.name,
+        breadcrumb,
+        location,
+        size,
+        homepage: entryInfo.homepage,
+        funding: entryInfo.funding,
+        packageInfo: JSON.parse(
+          fs.readFileSync(path.resolve(entryInfo.path, "package.json"), "utf8")
+        ),
+      };
+
+      dependencies.push([pathToDependencyOnDisk, processedDependency]);
+    });
+  } */
 
   return {
     latestPackages,

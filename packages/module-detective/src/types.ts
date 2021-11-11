@@ -1,9 +1,43 @@
+export type BasicJSON = Record<string, string>;
+
+// a very weak definition for https://github.com/npm/arborist/blob/48eb8fa01ea1cd1f89f47379b1ba4881a8bb9fbc/lib/node.js
+export interface ArboristNode {
+  children: Map<string, ArboristNode>;
+  dev: boolean;
+  devOptional: boolean;
+  dummy: boolean;
+  edgesIn: Set<ArboristNode>;
+  edgesOut: Map<string, ArboristNode>;
+  errors: Array<any>;
+  extraneous: boolean;
+  fsChildren: Set<ArboristNode>;
+  hasShrinkwrap: boolean;
+  integrity: unknown | null;
+  inventory: Map<string, ArboristNode>;
+  legacyPeerDeps: boolean;
+  linksIn: Set<ArboristNode>;
+  location: string;
+  name: string;
+  optional: boolean;
+  path: string;
+  peer: string;
+  realpath: string;
+  resolved: unknown | null;
+  sourceReference: unknown | null;
+  tops: Set<ArboristNode>;
+  package: BasicJSON;
+  packageName: string;
+  isLink: boolean;
+  homepage: string;
+  funding: string;
+}
+
 export interface IDependency {
   name: string;
   breadcrumb: string;
   size: number;
   location: string;
-  packageInfo: any;
+  packageInfo: BasicJSON;
   // url to dependecy
   homepage?: string;
   // funding url
@@ -20,6 +54,10 @@ export interface IActionMeta {
   size?: number;
 }
 
+export interface IVersionMeta extends IActionMeta {
+  version: string;
+}
+
 export interface IAction {
   message: string;
   meta: IActionMeta;
@@ -34,7 +72,7 @@ export interface ISuggestion {
 
 export interface IReport {
   latestPackages: any;
-  package: any;
+  package: BasicJSON;
   dependencies: [string, Omit<IDependency, "packageInfo">][];
   suggestions: ISuggestion[];
 }
