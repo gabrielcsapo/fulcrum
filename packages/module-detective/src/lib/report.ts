@@ -110,7 +110,6 @@ export default function Report(
         }),
       ],
     });
-    console.log("dev server", process.env.DEV_SERVER);
     if (process.env.DEV_SERVER) {
       const server = new WebpackDevServer(
         {
