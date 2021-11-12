@@ -1,5 +1,15 @@
-export type BasicJSON = Record<string, string>;
+import { IDependencyMap, IPackageJson } from "package-json-type";
+
 export type DependenciesList = [string, IDependency][];
+
+export interface IArboristEdge {
+  type: Set<string>;
+  name: string;
+  spec: string;
+  accept: string;
+  from: IArboristNode;
+  to: IArboristNode;
+}
 
 // a very weak definition for https://github.com/npm/arborist/blob/48eb8fa01ea1cd1f89f47379b1ba4881a8bb9fbc/lib/node.js
 export interface IArboristNode {
@@ -7,8 +17,8 @@ export interface IArboristNode {
   dev: boolean;
   devOptional: boolean;
   dummy: boolean;
-  edgesIn: Set<IArboristNode>;
-  edgesOut: Map<string, IArboristNode>;
+  edgesIn: Set<IArboristEdge>;
+  edgesOut: Map<string, IArboristEdge>;
   errors: Array<any>;
   extraneous: boolean;
   fsChildren: Set<IArboristNode>;
@@ -26,22 +36,22 @@ export interface IArboristNode {
   resolved: unknown | null;
   sourceReference: unknown | null;
   tops: Set<IArboristNode>;
-  package: BasicJSON;
+  package: IPackageJson;
   packageName: string;
   isLink: boolean;
   homepage: string;
   funding: string;
+  version: string;
+  meta: any;
 }
 
 export interface IDependency {
-  name: string;
   breadcrumb: string;
-  size: number;
-  location: string;
-  // url to dependecy
-  homepage?: string;
-  // funding url
   funding?: string;
+  homepage?: string;
+  location: string;
+  name: string;
+  size: number;
 }
 
 export interface IActionMeta {
@@ -71,8 +81,8 @@ export interface ISuggestion {
 }
 
 export interface IReport {
-  latestPackages: BasicJSON;
-  package: BasicJSON;
+  latestPackages: IDependencyMap;
+  package: IPackageJson;
   dependencies: DependenciesList;
   suggestions: ISuggestion[];
 }
