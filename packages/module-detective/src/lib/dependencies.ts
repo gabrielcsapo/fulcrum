@@ -6,125 +6,55 @@ import { exec } from "child_process";
 import semverDiff from "semver/functions/diff";
 import { copyFile, writeFile } from "fs/promises";
 
-import { humanFileSize } from "./utils";
+import humanFileSize from "./utils/human-file-size";
+import { getBreadcrumb } from "./utils/breadcrumb";
+import { getDirectorySize } from "./utils/disk";
+
 import {
   IAction,
   IVersionMeta,
   IReport,
   ISuggestion,
   IArboristNode,
-  BasicJSON,
   DependenciesList,
 } from "../types";
+import { IDependencyMap } from "package-json-type";
+
+debug("module-detective");
 
 const Arborist = require("@npmcli/arborist");
 
-const log = debug("module-detective");
-
-function getBreadcrumb(node: any): string {
-  const bread: string[] = [];
-
-  function walk(node: any): string[] {
-    if (bread.includes(node.name)) {
-      return bread;
-    }
-
-    if (node.edgesIn) {
-      const [edge] = [...node.edgesIn.values()];
-
-      if (edge && edge.from) {
-        bread.push(edge.name);
-
-        return walk(edge.from);
-      } else {
-        // we have gotten to the root project, don't push the root project name
-        return bread;
-      }
-    } else {
-      return bread;
-    }
-  }
-
-  return walk(node).reverse().join("#");
-}
-
-function getAllFiles(
-  dirPath: string,
-  exclude: RegExp,
-  arrayOfFiles?: string[]
-) {
-  const files = fs.readdirSync(dirPath);
-
-  const _arrayOfFiles = arrayOfFiles || [];
-
-  files.forEach(function (file: string) {
-    const fullPath = path.join(dirPath, file);
-
-    try {
-      if (fs.statSync(fullPath).isDirectory()) {
-        arrayOfFiles = getAllFiles(fullPath, exclude, arrayOfFiles);
-      } else {
-        if (!exclude || (exclude && !exclude.test(fullPath))) {
-          _arrayOfFiles.push(fullPath);
-        }
-      }
-    } catch (ex: any) {
-      console.log(ex.message);
-    }
-  });
-
-  return _arrayOfFiles;
-}
-
-function getEntries(dependencyTree: IArboristNode) {
-  // ignore the root node
-  return [...dependencyTree.inventory.entries()].filter(
-    (entry) => entry[0] !== ""
-  );
-}
-
-function getValues(dependencyTree: any): any[] {
+function getValues(dependencyTree: IArboristNode) {
   // ignore the root node
   return [...dependencyTree.inventory.values()].filter(
     (node) => node.location !== ""
   );
 }
 
-function getDirectorySize({
-  directory,
-  exclude,
-}: {
-  directory: string;
-  exclude: RegExp;
-}) {
-  const arrayOfFiles = getAllFiles(directory, exclude);
-
-  return arrayOfFiles
-    .map((filePath) => fs.statSync(filePath).size)
-    .reduce((a, b) => a + b, 0);
-}
-
 // TODO: the type of dependencyTree should come from npm/aborist
-function packagesWithPinnedVersions(dependencyTree: any): ISuggestion {
+function packagesWithPinnedVersions(
+  dependencyTree: IArboristNode
+): ISuggestion {
   const packagedWithPinned = [];
 
   for (const node of getValues(dependencyTree)) {
     const breadcrumb = getBreadcrumb(node);
 
-    for (const dependencyName in node.package.dependencies || {}) {
+    const { dependencies } = node.package ?? {};
+    for (const dependencyName in dependencies) {
       if (
         // might need to check the logic on this; "~" means "takes patches"
         // check node-semver to see the logc
-        node.package.dependencies[dependencyName].substring(0, 1) === "~"
+        dependencies[dependencyName].substring(0, 1) === "~"
       ) {
         try {
           const size = getDirectorySize({
-            directory: node.edgesOut.get(dependencyName).to.path,
+            directory: node.edgesOut.get(dependencyName)?.to.path ?? "",
             exclude: new RegExp(path.resolve(node.path, "docs")),
           });
 
           packagedWithPinned.push({
-            message: `"${node.name}" (${breadcrumb}) has a pinned version for ${dependencyName}@${node.package.dependencies[dependencyName]} that will never collapse.`,
+            message: `"${node.name}" (${breadcrumb}) has a pinned version for ${dependencyName}@${dependencies[dependencyName]} that will never collapse.`,
             meta: {
               breadcrumb,
               name: node.name,
@@ -151,7 +81,9 @@ function packagesWithPinnedVersions(dependencyTree: any): ISuggestion {
   };
 }
 
-function packagesWithExtraArtifacts(dependencyTree: any): ISuggestion {
+function packagesWithExtraArtifacts(
+  dependencyTree: IArboristNode
+): ISuggestion {
   const extraArtifacts = [];
 
   for (const node of getValues(dependencyTree)) {
@@ -213,8 +145,8 @@ function packagesWithExtraArtifacts(dependencyTree: any): ISuggestion {
 }
 
 function topLevelDepsFreshness(
-  dependencyTree: any,
-  latestPackages: any
+  dependencyTree: IArboristNode,
+  latestPackages: IDependencyMap
 ): ISuggestion {
   const dependencies = Object.assign(
     {},
@@ -230,41 +162,42 @@ function topLevelDepsFreshness(
 
   for (const dependency in dependencies) {
     try {
-      const topLevelPackagePath = "node_modules/" + dependency;
       const topLevelPackage = [...getValues(dependencyTree)].find(
-        (dependency) => dependency.location === topLevelPackagePath
+        (dependency) => dependency.location === `node_modules/${dependency}`
       );
-      const breadcrumb = getBreadcrumb(topLevelPackage);
-      const diff = semverDiff(
-        topLevelPackage.version,
-        latestPackages[topLevelPackage.name]
-      );
+      if (topLevelPackage) {
+        const breadcrumb = getBreadcrumb(topLevelPackage);
+        const diff = semverDiff(
+          topLevelPackage.version,
+          latestPackages[topLevelPackage.name]
+        );
 
-      switch (diff) {
-        case "major":
-          outOfDate.major.push({
-            name: dependency,
-            directory: `node_module/${dependency}`,
-            version: topLevelPackage.version,
-            breadcrumb,
-          });
-          break;
-        case "minor":
-          outOfDate.minor.push({
-            name: dependency,
-            directory: `node_module/${dependency}`,
-            version: topLevelPackage.version,
-            breadcrumb,
-          });
-          break;
-        case "patch":
-          outOfDate.patch.push({
-            name: dependency,
-            directory: `node_module/${dependency}`,
-            version: topLevelPackage.version,
-            breadcrumb,
-          });
-          break;
+        switch (diff) {
+          case "major":
+            outOfDate.major.push({
+              name: dependency,
+              directory: `node_module/${dependency}`,
+              version: topLevelPackage.version,
+              breadcrumb,
+            });
+            break;
+          case "minor":
+            outOfDate.minor.push({
+              name: dependency,
+              directory: `node_module/${dependency}`,
+              version: topLevelPackage.version,
+              breadcrumb,
+            });
+            break;
+          case "patch":
+            outOfDate.patch.push({
+              name: dependency,
+              directory: `node_module/${dependency}`,
+              version: topLevelPackage.version,
+              breadcrumb,
+            });
+            break;
+        }
       }
     } catch (ex) {
       // TODO: better debugging messaging here
@@ -327,7 +260,9 @@ function topLevelDepsFreshness(
 }
 
 // What dependencies you are bringing in that don't absorb into the semver ranges at the top level
-function notBeingAbsorbedByTopLevel(dependencyTree: any): ISuggestion {
+function notBeingAbsorbedByTopLevel(
+  dependencyTree: IArboristNode
+): ISuggestion {
   const notAbsorbed = [];
 
   for (const node of getValues(dependencyTree)) {
@@ -380,10 +315,14 @@ function notBeingAbsorbedByTopLevel(dependencyTree: any): ISuggestion {
 
 // What percentage of your nested dependencies do you bring in that are out of date (major, minor, patch)
 function nestedDependencyFreshness(
-  dependencyTree: any,
-  latestPackages: any
+  dependencyTree: IArboristNode,
+  latestPackages: IDependencyMap
 ): ISuggestion {
-  const outOfDate: { major: any[]; minor: any[]; patch: any[] } = {
+  const outOfDate: {
+    major: IArboristNode[];
+    minor: IArboristNode[];
+    patch: IArboristNode[];
+  } = {
     major: [],
     minor: [],
     patch: [],
@@ -474,18 +413,18 @@ function nestedDependencyFreshness(
 
 async function getLatestPackages(
   dependencyTree: IArboristNode
-): Promise<BasicJSON> {
+): Promise<IDependencyMap> {
   // TODO: this should be cached for faster build times and not having to make large requests to NPM
-  const fakePackageJson: { dependencies: BasicJSON } = {
+  const fakePackageJson: { dependencies: IDependencyMap } = {
     dependencies: {},
   };
 
-  const dependencyKeys = getEntries(dependencyTree)
-    .filter(([, node]) => {
+  const dependencyKeys = getValues(dependencyTree)
+    .filter((node) => {
       // ignore linked packages and packages that have realpaths that are on disk (which means they are linked and potentially don't exist in the registry)
       return !node.isLink && node.realpath.includes("node_modules");
     })
-    .map(([, node]) => node.name);
+    .map((node) => node.name);
 
   dependencyKeys.forEach((key) => {
     if (key.includes("fastlane")) return;
@@ -500,7 +439,7 @@ async function getLatestPackages(
     JSON.stringify(fakePackageJson)
   );
 
-  const latestPackages: BasicJSON = {};
+  const latestPackages: IDependencyMap = {};
   try {
     // need to keep the registry context for the fake package.json so things get resolved correctly when checking outdated
     await copyFile(
@@ -535,23 +474,23 @@ export default async function generateReport(cwd: string): Promise<IReport> {
   const dependencies: DependenciesList = [];
 
   if (dependencyTree.inventory.size) {
-    getEntries(dependencyTree).forEach(([entryPath, entryInfo]) => {
+    getValues(dependencyTree).forEach((entryInfo) => {
       const location = path
-        .resolve(entryPath)
+        .resolve(entryInfo.location)
         .replace(path.resolve(cwd) + "/", "");
 
       dependencies.push([
         location,
         {
-          name: entryInfo.name,
           breadcrumb: getBreadcrumb(entryInfo),
+          funding: entryInfo.funding,
+          homepage: entryInfo.homepage,
           location,
+          name: entryInfo.name,
           size: getDirectorySize({
             directory: entryInfo.path,
             exclude: new RegExp(path.resolve(entryInfo.path, "node_modules")),
           }),
-          homepage: entryInfo.homepage,
-          funding: entryInfo.funding,
         },
       ]);
     });
