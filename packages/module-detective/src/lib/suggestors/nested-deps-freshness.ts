@@ -4,7 +4,7 @@ import { ISuggestion, IAction, IArboristNode } from "../../types";
 import { getBreadcrumb } from "../utils/breadcrumb";
 
 // What percentage of your nested dependencies do you bring in that are out of date (major, minor, patch)
-export function nestedDependencyFreshness(
+export default function nestedDependencyFreshness(
   dependencyValues: IArboristNode[],
   latestPackages: IDependencyMap
 ): ISuggestion {

@@ -3,7 +3,7 @@ import { IArboristNode, ISuggestion, IVersionMeta, IAction } from "../../types";
 import { getBreadcrumb } from "../utils/breadcrumb";
 import semverDiff from "semver/functions/diff";
 
-export function topLevelDepsFreshness(
+export default function topLevelDepsFreshness(
   root: IArboristNode,
   dependencyValues: IArboristNode[],
   latestPackages: IDependencyMap

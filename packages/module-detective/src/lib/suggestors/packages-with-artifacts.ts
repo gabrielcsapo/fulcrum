@@ -5,7 +5,7 @@ import { getBreadcrumb } from "../utils/breadcrumb";
 import { getDirectorySize } from "../utils/disk";
 import humanFileSize from "../utils/human-file-size";
 
-export function packagesWithExtraArtifacts(
+export default function packagesWithExtraArtifacts(
   dependencyValues: IArboristNode[]
 ): ISuggestion {
   const extraArtifacts = [];

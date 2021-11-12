@@ -5,7 +5,7 @@ import { getDirectorySize } from "../utils/disk";
 import humanFileSize from "../utils/human-file-size";
 
 // What dependencies you are bringing in that don't absorb into the semver ranges at the top level
-export function notBeingAbsorbedByTopLevel(
+export default function notBeingAbsorbedByTopLevel(
   root: IArboristNode,
   dependencyValues: IArboristNode[]
 ): ISuggestion {

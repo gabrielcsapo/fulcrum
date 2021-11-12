@@ -9,11 +9,13 @@ import { getDirectorySize } from "./utils/disk";
 
 import { IReport, IArboristNode, DependenciesList } from "../types";
 import { IDependencyMap } from "package-json-type";
-import { topLevelDepsFreshness } from "./suggestors/top-level-deps-freshness";
-import { nestedDependencyFreshness } from "./suggestors/nested-deps-freshness";
-import { notBeingAbsorbedByTopLevel } from "./suggestors/not-absorbed-by-top-level";
-import { packagesWithExtraArtifacts } from "./suggestors/packages-with-artifacts";
-import { packagesWithPinnedVersions } from "./suggestors/packages-with-pinned-versions";
+import {
+  topLevelDepsFreshness,
+  nestedDependencyFreshness,
+  notBeingAbsorbedByTopLevel,
+  packagesWithExtraArtifacts,
+  packagesWithPinnedVersions,
+} from "./suggestors";
 
 debug("module-detective");
 

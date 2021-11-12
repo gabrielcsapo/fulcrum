@@ -4,7 +4,7 @@ import { getBreadcrumb } from "../utils/breadcrumb";
 import { getDirectorySize } from "../utils/disk";
 import humanFileSize from "../utils/human-file-size";
 
-export function packagesWithPinnedVersions(
+export default function packagesWithPinnedVersions(
   dependencyValues: IArboristNode[]
 ): ISuggestion {
   const packagedWithPinned = [];
