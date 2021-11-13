@@ -1,4 +1,5 @@
 import { IDependencyMap, IPackageJson } from "package-json-type";
+import { Interface } from "readline";
 
 export type DependenciesList = [string, IDependency][];
 
@@ -71,6 +72,12 @@ export interface IVersionMeta extends IActionMeta {
 export interface IAction {
   message: string;
   meta: IActionMeta;
+}
+
+export interface ISuggestionInput {
+  rootArboristNode?: IArboristNode;
+  arboristValues: IArboristNode[];
+  latestPackages?: IDependencyMap;
 }
 
 export interface ISuggestion {

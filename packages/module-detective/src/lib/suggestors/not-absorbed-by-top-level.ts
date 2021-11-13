@@ -1,23 +1,27 @@
 import path from "path";
-import { IArboristNode, ISuggestion } from "../../types";
+import { ISuggestion, ISuggestionInput } from "../../types";
 import { getBreadcrumb } from "../utils/breadcrumb";
 import { getDirectorySize } from "../utils/disk";
 import humanFileSize from "../utils/human-file-size";
 
-// What dependencies you are bringing in that don't absorb into the semver ranges at the top level
-export default function notBeingAbsorbedByTopLevel(
-  root: IArboristNode,
-  dependencyValues: IArboristNode[]
-): ISuggestion {
+/**
+ * What dependencies you are bringing in that don't absorb into
+ * the semver ranges at the top level
+ * version range that doesn't satisfy the top level version range
+ */
+export default function notBeingAbsorbedByTopLevel({
+  rootArboristNode,
+  arboristValues,
+}: ISuggestionInput): Promise<ISuggestion> {
   const notAbsorbed = [];
 
-  for (const node of dependencyValues) {
+  for (const node of arboristValues) {
     const topLevelPath = `node_modules/${node.name}`;
 
     // don't count dependencies that are topLevel dependencies
     if (topLevelPath === node.path) continue;
 
-    const topLevelPackage = root.meta.data.packages[topLevelPath];
+    const topLevelPackage = rootArboristNode?.meta.data.packages[topLevelPath];
 
     // if there is no top level package there was no need to hoist it to deduplicate as there is only one package in the tree
     if (!topLevelPackage) continue;
@@ -47,7 +51,7 @@ export default function notBeingAbsorbedByTopLevel(
     }
   }
 
-  return {
+  return Promise.resolve({
     id: "notBeingAbsorbedByTopLevel",
     name: "Dependencies not being absorbed",
     message: `There are currently ${
@@ -56,5 +60,5 @@ export default function notBeingAbsorbedByTopLevel(
       notAbsorbed.reduce((total, dep) => total + dep.meta.size, 0)
     )}`,
     actions: notAbsorbed.sort((a, b) => b.meta.size - a.meta.size),
-  };
+  });
 }

@@ -1,13 +1,20 @@
-import { IDependencyMap } from "package-json-type";
 import semverDiff from "semver/functions/diff";
-import { ISuggestion, IAction, IArboristNode } from "../../types";
+import {
+  ISuggestion,
+  IAction,
+  IArboristNode,
+  ISuggestionInput,
+} from "../../types";
 import { getBreadcrumb } from "../utils/breadcrumb";
+import { getLatestPackages } from "../utils/latest-packages";
 
-// What percentage of your nested dependencies do you bring in that are out of date (major, minor, patch)
-export default function nestedDependencyFreshness(
-  dependencyValues: IArboristNode[],
-  latestPackages: IDependencyMap
-): ISuggestion {
+/**
+ * What percentage of your nested dependencies do you bring in that are out of date
+ * (major, minor, patch)
+ */
+export default async function nestedDependencyFreshness({
+  arboristValues,
+}: ISuggestionInput): Promise<ISuggestion> {
   const outOfDate: {
     major: IArboristNode[];
     minor: IArboristNode[];
@@ -19,7 +26,9 @@ export default function nestedDependencyFreshness(
   };
   let totalDeps = 0;
 
-  for (const node of dependencyValues) {
+  const latestPackages = await getLatestPackages(arboristValues);
+
+  for (const node of arboristValues) {
     totalDeps += 1;
 
     try {

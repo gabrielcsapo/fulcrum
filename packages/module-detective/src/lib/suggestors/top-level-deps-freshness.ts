@@ -1,17 +1,22 @@
-import { IDependencyMap } from "package-json-type";
-import { IArboristNode, ISuggestion, IVersionMeta, IAction } from "../../types";
+import {
+  ISuggestion,
+  IVersionMeta,
+  IAction,
+  ISuggestionInput,
+} from "../../types";
 import { getBreadcrumb } from "../utils/breadcrumb";
 import semverDiff from "semver/functions/diff";
+import { getLatestPackages } from "../utils/latest-packages";
 
-export default function topLevelDepsFreshness(
-  root: IArboristNode,
-  dependencyValues: IArboristNode[],
-  latestPackages: IDependencyMap
-): ISuggestion {
+export default async function topLevelDepsFreshness({
+  rootArboristNode,
+  arboristValues,
+}: // latestPackages: IDependencyMap
+ISuggestionInput): Promise<ISuggestion> {
   const dependencies = Object.assign(
     {},
-    Object.assign({}, root.package.devDependencies || {}),
-    root.package.dependencies || {}
+    Object.assign({}, rootArboristNode?.package.devDependencies ?? {}),
+    rootArboristNode?.package.dependencies ?? {}
   );
   const totalDeps = Object.keys(dependencies).length;
   const outOfDate: {
@@ -19,10 +24,11 @@ export default function topLevelDepsFreshness(
     minor: IVersionMeta[];
     patch: IVersionMeta[];
   } = { major: [], minor: [], patch: [] };
+  const latestPackages = await getLatestPackages(arboristValues);
 
   for (const dependency in dependencies) {
     try {
-      const topLevelPackage = dependencyValues.find(
+      const topLevelPackage = arboristValues.find(
         (dependency) => dependency.location === `node_modules/${dependency}`
       );
       if (topLevelPackage) {
