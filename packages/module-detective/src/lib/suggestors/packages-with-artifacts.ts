@@ -1,16 +1,20 @@
 import fs from "fs";
 import path from "path";
-import { IArboristNode, ISuggestion } from "../../types";
+import { ISuggestion, ISuggestionInput } from "../../types";
 import { getBreadcrumb } from "../utils/breadcrumb";
 import { getDirectorySize } from "../utils/disk";
 import humanFileSize from "../utils/human-file-size";
 
-export default function packagesWithExtraArtifacts(
-  dependencyValues: IArboristNode[]
-): ISuggestion {
+/**
+ * // docs/ or tests/ is published to npm - how do you NOT publish them
+ * (use ignore file or package.json.files[]?
+ */
+export default async function packagesWithExtraArtifacts({
+  arboristValues,
+}: ISuggestionInput): Promise<ISuggestion> {
   const extraArtifacts = [];
 
-  for (const node of dependencyValues) {
+  for (const node of arboristValues) {
     const breadcrumb = getBreadcrumb(node);
 
     if (fs.existsSync(path.resolve(node.path, "docs"))) {
@@ -56,7 +60,7 @@ export default function packagesWithExtraArtifacts(
     }
   }
 
-  return {
+  return Promise.resolve({
     id: "packagesWithExtraArtifacts",
     name: "Packages with extra artifacts",
     message: `There are currently ${
@@ -65,5 +69,5 @@ export default function packagesWithExtraArtifacts(
       extraArtifacts.reduce((total, dep) => total + dep.meta.size, 0)
     )}`,
     actions: extraArtifacts.sort((a, b) => b.meta.size - a.meta.size),
-  };
+  });
 }
