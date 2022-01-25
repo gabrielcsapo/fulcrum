@@ -26,25 +26,22 @@ function getValues(dependencyTree: IArboristNode) {
 }
 
 export default async function generateReport(cwd: string): Promise<IReport> {
-  const arb = new Arborist({});
+  const arb = new Arborist({
+    path: cwd,
+  });
   const rootArboristNode: IArboristNode = await arb.loadActual();
   const arboristValues = getValues(rootArboristNode);
   const latestPackages = await getLatestPackages(arboristValues);
-
   const dependencies: DependenciesList = [];
 
   arboristValues.forEach((entryInfo) => {
-    const location = path
-      .resolve(entryInfo.location)
-      .replace(path.resolve(cwd) + "/", "");
-
     dependencies.push([
-      location,
+      entryInfo.path,
       {
         breadcrumb: getBreadcrumb(entryInfo),
         funding: entryInfo.funding,
         homepage: entryInfo.homepage,
-        location,
+        location: entryInfo.path,
         name: entryInfo.name,
         size: getDirectorySize({
           directory: entryInfo.path,

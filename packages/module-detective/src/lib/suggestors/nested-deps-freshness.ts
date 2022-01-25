@@ -29,10 +29,24 @@ export default async function nestedDependencyFreshness({
   const latestPackages = await getLatestPackages(arboristValues);
 
   for (const node of arboristValues) {
+    // ignore links or workspaces
+    if (node.isLink || node.isWorkspace) {
+      continue;
+    }
+
     totalDeps += 1;
 
     try {
-      const diff = semverDiff(node.version, latestPackages[node.name]);
+      let diff;
+      try {
+        diff = semverDiff(node.version, latestPackages[node.name]);
+      } catch (ex) {
+        console.log(
+          `Could not get a diff for ${node.name} between (${node.version} <> ${
+            latestPackages[node.name]
+          }) (${node.isLink || node.isWorkspace})`
+        );
+      }
 
       switch (diff) {
         case "major":

@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+
 import { ISuggestion, ISuggestionInput } from "../../types";
 import { getBreadcrumb } from "../utils/breadcrumb";
 import { getDirectorySize } from "../utils/disk";
@@ -19,44 +20,46 @@ export default async function packagesWithExtraArtifacts({
 
     if (fs.existsSync(path.resolve(node.path, "docs"))) {
       const size = getDirectorySize({
-        directory: node.path,
-        exclude: new RegExp(path.resolve(node.path, "docs")),
+        directory: path.resolve(node.path, "docs"),
       });
 
-      extraArtifacts.push({
-        message: `"${
-          node.name
-        }" (${breadcrumb}) has a "docs" folder which is not necessary for production usage ${humanFileSize(
-          size
-        )}.`,
-        meta: {
-          breadcrumb,
-          name: node.name,
-          directory: node.path,
-          size,
-        },
-      });
+      if (size > 0) {
+        extraArtifacts.push({
+          message: `"${
+            node.name
+          }" (${breadcrumb}) has a "docs" folder which is not necessary for production usage ${humanFileSize(
+            size
+          )}.`,
+          meta: {
+            breadcrumb,
+            name: node.name,
+            directory: node.path,
+            size,
+          },
+        });
+      }
     }
 
     if (fs.existsSync(path.resolve(node.path, "tests"))) {
       const size = getDirectorySize({
-        directory: node.path,
-        exclude: new RegExp(path.resolve(node.path, "tests")),
+        directory: path.resolve(node.path, "tests"),
       });
 
-      extraArtifacts.push({
-        message: `"${
-          node.name
-        }" (${breadcrumb}) has a "tests" folder which is not necessary for production usage ${humanFileSize(
-          size
-        )}.`,
-        meta: {
-          breadcrumb,
-          name: node.name,
-          directory: node.path,
-          size,
-        },
-      });
+      if (size > 0) {
+        extraArtifacts.push({
+          message: `"${
+            node.name
+          }" (${breadcrumb}) has a "tests" folder which is not necessary for production usage ${humanFileSize(
+            size
+          )}.`,
+          meta: {
+            breadcrumb,
+            name: node.name,
+            directory: node.path,
+            size,
+          },
+        });
+      }
     }
   }
 
