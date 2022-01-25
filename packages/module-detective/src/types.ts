@@ -40,10 +40,10 @@ export interface IArboristNode {
   package: IPackageJson;
   packageName: string;
   isLink: boolean;
+  isWorkspace: boolean;
   homepage: string;
   funding: string;
   version: string;
-  meta: any;
 }
 
 export interface IDependency {

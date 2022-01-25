@@ -1,4 +1,6 @@
 import path from "path";
+import debug from "debug";
+
 import { ISuggestion, ISuggestionInput } from "../../types";
 import { getBreadcrumb } from "../utils/breadcrumb";
 import { getDirectorySize } from "../utils/disk";
@@ -19,12 +21,20 @@ export default function notBeingAbsorbedByTopLevel({
     const topLevelPath = `node_modules/${node.name}`;
 
     // don't count dependencies that are topLevel dependencies
-    if (topLevelPath === node.path) continue;
+    if (topLevelPath === node.location) continue;
 
-    const topLevelPackage = rootArboristNode?.meta.data.packages[topLevelPath];
+    const topLevelPackage = rootArboristNode?.children.get(node.name);
+
+    // ignore links or workspaces
+    if (node.isLink || node.isWorkspace) {
+      continue;
+    }
 
     // if there is no top level package there was no need to hoist it to deduplicate as there is only one package in the tree
-    if (!topLevelPackage) continue;
+    if (!topLevelPackage) {
+      debug(`No topLevelPackage for ${topLevelPath}`);
+      continue;
+    }
 
     if (topLevelPackage && topLevelPackage.version !== node.version) {
       const breadcrumb = getBreadcrumb(node);

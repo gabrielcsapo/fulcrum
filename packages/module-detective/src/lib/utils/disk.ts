@@ -3,7 +3,7 @@ import path from "path";
 
 export function getAllFiles(
   dirPath: string,
-  exclude: RegExp,
+  exclude?: RegExp,
   arrayOfFiles?: string[]
 ) {
   const files = fs.readdirSync(dirPath);
@@ -14,11 +14,20 @@ export function getAllFiles(
     const fullPath = path.join(dirPath, file);
 
     try {
-      if (fs.statSync(fullPath).isDirectory()) {
-        arrayOfFiles = getAllFiles(fullPath, exclude, arrayOfFiles);
+      if (
+        fs.statSync(fullPath).isDirectory() &&
+        (!exclude || (exclude && !exclude.test(fullPath)))
+      ) {
+        try {
+          _arrayOfFiles.push(...getAllFiles(fullPath, exclude));
+        } catch (ex: any) {
+          console.log(ex.message);
+        }
       } else {
         if (!exclude || (exclude && !exclude.test(fullPath))) {
           _arrayOfFiles.push(fullPath);
+        } else {
+          console.log("excluding", fullPath, " for ", dirPath, exclude);
         }
       }
     } catch (ex: any) {
@@ -34,11 +43,13 @@ export function getDirectorySize({
   exclude,
 }: {
   directory: string;
-  exclude: RegExp;
+  exclude?: RegExp;
 }) {
   const arrayOfFiles = getAllFiles(directory, exclude);
 
-  return arrayOfFiles
+  const size = arrayOfFiles
     .map((filePath) => fs.statSync(filePath).size)
     .reduce((a, b) => a + b, 0);
+
+  return size;
 }

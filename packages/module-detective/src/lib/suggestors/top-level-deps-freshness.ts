@@ -28,15 +28,30 @@ ISuggestionInput): Promise<ISuggestion> {
 
   for (const dependency in dependencies) {
     try {
-      const topLevelPackage = arboristValues.find(
-        (dependency) => dependency.location === `node_modules/${dependency}`
-      );
+      const topLevelPackage = rootArboristNode?.children.get(dependency);
+
       if (topLevelPackage) {
+        // ignore links or workspaces
+        if (topLevelPackage.isLink || topLevelPackage.isWorkspace) {
+          continue;
+        }
+
         const breadcrumb = getBreadcrumb(topLevelPackage);
-        const diff = semverDiff(
-          topLevelPackage.version,
-          latestPackages[topLevelPackage.name]
-        );
+        let diff;
+        try {
+          diff = semverDiff(
+            topLevelPackage.version,
+            latestPackages[topLevelPackage.name]
+          );
+        } catch (ex) {
+          console.log(
+            `Could not get a diff for ${topLevelPackage.name} between (${
+              topLevelPackage.version
+            } <> ${latestPackages[topLevelPackage.name]}) (${
+              topLevelPackage.isLink || topLevelPackage.isWorkspace
+            })`
+          );
+        }
 
         switch (diff) {
           case "major":
@@ -64,6 +79,8 @@ ISuggestionInput): Promise<ISuggestion> {
             });
             break;
         }
+      } else {
+        console.log(`No topLevelPackage found for ${dependency}`);
       }
     } catch (ex) {
       // TODO: better debugging messaging here

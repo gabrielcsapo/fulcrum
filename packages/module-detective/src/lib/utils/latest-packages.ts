@@ -6,6 +6,10 @@ import { copyFile, writeFile } from "fs/promises";
 import { IDependencyMap } from "package-json-type";
 import { IArboristNode } from "../../types";
 
+import { promisify } from "util";
+
+const execPromise = promisify(exec);
+
 let _CACHEDLATESTPACKAGES: IDependencyMap = {};
 
 export async function getLatestPackages(
@@ -23,7 +27,10 @@ export async function getLatestPackages(
   const dependencyKeys = arboristValues
     .filter((node) => {
       // ignore linked packages and packages that have realpaths that are on disk (which means they are linked and potentially don't exist in the registry)
-      return !node.isLink && node.realpath.includes("node_modules");
+      return (
+        (!node.isLink || !node.isWorkspace) &&
+        node.realpath.includes("node_modules")
+      );
     })
     .map((node) => node.name);
 
@@ -52,7 +59,7 @@ export async function getLatestPackages(
   }
 
   try {
-    await exec("npm outdated --json", {
+    await execPromise("npm outdated --json", {
       cwd: tmpobj.name,
     });
   } catch (ex: any) {
