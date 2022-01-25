@@ -24,7 +24,6 @@ Options:
 ### Getting Started
 
 1. `npm install`
-2. `./node_modules/.bin/lerna bootstrap -- --legacy-peer-deps` (or install lerna globally)
 
 ### Self Analysis
 
