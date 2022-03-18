@@ -31,7 +31,7 @@ export default function Report(
       _NODE_ENV = process.env.NODE_ENV as "production";
     }
     const compiler = webpack({
-      entry: require.resolve("module-detective-ui"),
+      entry: require.resolve("package-inspector-ui"),
       context: path.resolve(__dirname, ".."),
       output: {
         path: outputDir,
@@ -103,10 +103,9 @@ export default function Report(
         modules: [path.resolve(__dirname, "node_modules"), "node_modules"],
       },
       plugins: [
-        new StatoscopeWebpackPlugin(),
         new HtmlWebpackPlugin({
           filename: outputFile,
-          template: require.resolve("module-detective-ui/src/template.html"),
+          template: require.resolve("package-inspector-ui/src/template.html"),
         }),
       ],
     });

@@ -73,6 +73,7 @@ export default async function nestedDependencyFreshness({
       message: `"${name}@${version}" is required at "${breadcrumb}", the latest is ${latestPackages[name]}. This is a major version out of date.`,
       meta: {
         name,
+        version,
         directory: path,
         breadcrumb,
       },
@@ -86,6 +87,7 @@ export default async function nestedDependencyFreshness({
       message: `"${name}@${version}" is required at "${breadcrumb}", the latest is ${latestPackages[name]}. This is a minor version out of date.`,
       meta: {
         name,
+        version,
         directory: path,
         breadcrumb,
       },
@@ -99,6 +101,7 @@ export default async function nestedDependencyFreshness({
       message: `"${name}@${version}" is required at "${breadcrumb}", the latest is ${latestPackages[name]}. This is a patch version out of date.`,
       meta: {
         name,
+        version,
         directory: path,
         breadcrumb,
       },

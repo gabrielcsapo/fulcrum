@@ -25,7 +25,7 @@ const { argv } = yargs
       type: "boolean",
     },
     path: {
-      describe: "The path to run module-detective against",
+      describe: "The path to run package-inspector against",
       default: process.cwd(),
       type: "string",
     },

@@ -137,7 +137,7 @@ function App(props) {
               underline="none"
               to="/"
             >
-              Module Detective
+              Package Inspector
             </Link>
           </Typography>
 
@@ -192,9 +192,9 @@ function App(props) {
               {"Copyright © "}
               <Link
                 color="inherit"
-                href="https://github.com/gabrielcsapo/module-detective"
+                href="https://github.com/gabrielcsapo/package-inspector"
               >
-                Module Detective
+                Package Inspector
               </Link>{" "}
               {new Date().getFullYear()}
               {"."}

@@ -51,6 +51,7 @@ export interface IDependency {
   funding?: string;
   homepage?: string;
   location: string;
+  version: string;
   name: string;
   size: number;
 }
@@ -61,6 +62,7 @@ export interface IActionMeta {
   name: string;
   // path to the full directory (might be )
   directory: string;
+  version: string;
   // optional b/c the item might not actually exist where specified (the "link" has 0 bytes)
   size?: number;
 }

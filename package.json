@@ -4,7 +4,7 @@
   "scripts": {
     "lint": "npm run lint --workspaces",
     "build": "npm run build --workspaces",
-    "docs": "npm run build && ./packages/module-detective/bin/index.js --report --outputDir docs",
+    "docs": "npm run build && ./packages/package-inspector/bin/index.js --report --outputDir docs",
     "prepare": "husky install"
   },
   "devDependencies": {

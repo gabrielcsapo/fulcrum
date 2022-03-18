@@ -34,6 +34,7 @@ export default async function packagesWithExtraArtifacts({
             breadcrumb,
             name: node.name,
             directory: node.path,
+            version: node.version,
             size,
           },
         });
@@ -56,6 +57,7 @@ export default async function packagesWithExtraArtifacts({
             breadcrumb,
             name: node.name,
             directory: node.path,
+            version: node.version,
             size,
           },
         });

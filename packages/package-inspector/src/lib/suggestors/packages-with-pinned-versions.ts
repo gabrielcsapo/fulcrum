@@ -18,10 +18,12 @@ export default async function packagesWithPinnedVersions({
 
     const { dependencies } = node.package ?? {};
     for (const dependencyName in dependencies) {
+      const version = dependencies[dependencyName];
+
       if (
         // might need to check the logic on this; "~" means "takes patches"
         // check node-semver to see the logc
-        dependencies[dependencyName].substring(0, 1) === "~"
+        version.substring(0, 1) === "~"
       ) {
         try {
           const size = getDirectorySize({
@@ -30,11 +32,12 @@ export default async function packagesWithPinnedVersions({
           });
 
           packagedWithPinned.push({
-            message: `"${node.name}" (${breadcrumb}) has a pinned version for ${dependencyName}@${dependencies[dependencyName]} that will never collapse.`,
+            message: `"${node.name}" (${breadcrumb}) has a pinned version for ${dependencyName}@${version} that will never collapse.`,
             meta: {
               breadcrumb,
               name: node.name,
               directory: node.path,
+              version,
               size,
             },
           });

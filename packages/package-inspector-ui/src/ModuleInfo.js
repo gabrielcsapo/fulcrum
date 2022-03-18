@@ -13,6 +13,7 @@ import ListItemText from "@mui/material/ListItemText";
 
 function ModuleInfoHeader(props) {
   const { packageInfo = {} } = props;
+  console.log(props);
   const homepageUrl = packageInfo?.homepage?.url;
   const fundingUrl = packageInfo?.funding?.url;
 
@@ -47,13 +48,14 @@ export default function ModuleInfo(props) {
 
   let topLevelPackageInfo = {};
 
-  for (const [dependencyPath, dependencyInfo] of dependencies) {
+  for (const [, dependencyInfo] of dependencies) {
     if (dependencyInfo.name === name) {
       const breadcrumb = dependencyInfo.breadcrumb;
-      const version = dependencyInfo?.packageInfo?.version;
+      const version = dependencyInfo?.version;
 
       // verify we are at the top level module
-      if (dependencyPath === `node_modules/${name}`) {
+      console.log(dependencyInfo.location, `node_modules/${name}`);
+      if (dependencyInfo.location === `node_modules/${name}`) {
         topLevelPackageInfo = dependencyInfo;
       }
 

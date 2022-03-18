@@ -14,7 +14,7 @@ import {
   packagesWithPinnedVersions,
 } from "./suggestors";
 
-debug("module-detective");
+debug("package-inspector");
 
 const Arborist = require("@npmcli/arborist");
 
@@ -39,10 +39,14 @@ export default async function generateReport(cwd: string): Promise<IReport> {
       entryInfo.path,
       {
         breadcrumb: getBreadcrumb(entryInfo),
-        funding: entryInfo.funding,
-        homepage: entryInfo.homepage,
-        location: entryInfo.path,
+        funding: entryInfo.funding || "N/A",
+        homepage: entryInfo.homepage || "N/A",
+        // get the relative location to the project root
+        location: entryInfo.path
+          ? entryInfo.path.replace(process.cwd() + "/", "")
+          : "N/A",
         name: entryInfo.name,
+        version: entryInfo.version,
         size: getDirectorySize({
           directory: entryInfo.path,
           exclude: new RegExp(path.resolve(entryInfo.path, "node_modules")),

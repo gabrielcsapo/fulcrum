@@ -1,5 +1,5 @@
 {
-  "name": "module-detective-ui",
+  "name": "package-inspector-ui",
   "version": "0.0.0",
   "main": "src/index.js",
   "scripts": {

@@ -94,6 +94,7 @@ ISuggestionInput): Promise<ISuggestion> {
     actions.push({
       message: `"${name}@${version}" is required as a direct dependency, the latest is ${latestPackages[name]}. This is a major version out of date.`,
       meta: {
+        version,
         name,
         directory,
         breadcrumb,
@@ -105,6 +106,7 @@ ISuggestionInput): Promise<ISuggestion> {
     actions.push({
       message: `"${name}@${version}" is required as a direct dependency, the latest is ${latestPackages[name]}. This is a minor version out of date.`,
       meta: {
+        version,
         name,
         directory,
         breadcrumb,
@@ -116,6 +118,7 @@ ISuggestionInput): Promise<ISuggestion> {
     actions.push({
       message: `"${name}@${version}" is required as a direct dependency, the latest is ${latestPackages[name]}. This is a patch version out of date.`,
       meta: {
+        version,
         name,
         directory,
         breadcrumb,

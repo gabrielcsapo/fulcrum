@@ -55,6 +55,7 @@ export default function notBeingAbsorbedByTopLevel({
           breadcrumb,
           name: node.name,
           directory: node.path,
+          version: node.version,
           size,
         },
       });

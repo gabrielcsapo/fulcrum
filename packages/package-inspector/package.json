@@ -1,5 +1,5 @@
 {
-  "name": "module-detective",
+  "name": "package-inspector",
   "version": "0.0.0",
   "description": "Node module analytics tool to help figure out how your dependencies are affecting you 🖲",
   "main": "index.js",
@@ -22,7 +22,7 @@
     "@babel/core": "^7.16.12",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.0",
-    "@npmcli/arborist": "^4.2.1",
+    "@npmcli/arborist": "^5.0.3",
     "@statoscope/webpack-plugin": "^5.20.0",
     "babel-loader": "^8.2.3",
     "chalk": "^5.0.0",
@@ -33,9 +33,9 @@
     "semver": "^7.3.5",
     "style-loader": "^3.3.1",
     "tmp": "^0.2.1",
-    "webpack": "^5.67.0",
-    "webpack-dev-server": "^4.7.3",
-    "module-detective-ui": "0.0.0",
+    "webpack": "^5.70.0",
+    "webpack-dev-server": "^4.7.4",
+    "package-inspector-ui": "0.0.0",
     "yargs": "^17.3.1"
   },
   "devDependencies": {
