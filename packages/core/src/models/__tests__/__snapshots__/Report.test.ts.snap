@@ -1,0 +1,115 @@
+// Vitest Snapshot v1
+
+exports[`Report > loadFromFile > it should load a json report with minimal node modules 1`] = `
+Report {
+  "dependencies": {},
+  "latestPackages": {},
+  "pluginInfo": {},
+  "root": {
+    "dependencies": [],
+    "devDependencies": [],
+    "name": "",
+    "version": "",
+  },
+  "suggestions": [],
+}
+`;
+
+exports[`Report > loadFromFile > it should load a json report with minimal node modules 2`] = `
+Report {
+  "dependencies": {
+    "left-pad@1.3.0": {
+      "dependencies": [],
+      "devDependencies": [
+        "benchmark@^2.1.0",
+        "fast-check@0.0.8",
+        "tape@*",
+      ],
+      "metadata": {
+        "pathsOnDisk": [
+          "/node_modules/left-pad",
+        ],
+        "size": {
+          "files": 10,
+          "physical": 9752,
+        },
+      },
+      "name": "left-pad",
+      "type": "prod",
+      "version": "1.3.0",
+    },
+  },
+  "latestPackages": {},
+  "pluginInfo": {},
+  "root": {
+    "dependencies": [
+      "left-pad@1.3.0",
+    ],
+    "devDependencies": [],
+    "metadata": {
+      "pathsOnDisk": [
+        "",
+      ],
+    },
+    "name": "min-node-modules",
+    "version": "1.0.0",
+  },
+  "suggestions": [],
+}
+`;
+
+exports[`Report > loadFromFile > it should load a simple json report 1`] = `
+Report {
+  "dependencies": {},
+  "latestPackages": {},
+  "pluginInfo": {},
+  "root": {
+    "dependencies": [],
+    "devDependencies": [],
+    "name": "",
+    "version": "",
+  },
+  "suggestions": [],
+}
+`;
+
+exports[`Report > loadFromFile > it should load a simple json report 2`] = `
+Report {
+  "dependencies": {},
+  "latestPackages": {},
+  "pluginInfo": {},
+  "root": {
+    "dependencies": [],
+    "devDependencies": [],
+    "metadata": {
+      "pathsOnDisk": [
+        "",
+      ],
+    },
+    "name": "no-node-modules",
+    "version": "1.0.0",
+  },
+  "suggestions": [],
+}
+`;
+
+exports[`Report > serializeReport > it should serialize "latestPackages" 1`] = `
+{
+  "latestPackages": {
+    "bar": "7.33.1",
+    "foo": "1.33.7",
+  },
+}
+`;
+
+exports[`Report > serializeReport > it should serialize a project with minimal node modules 1`] = `
+{
+  "latestPackages": {},
+}
+`;
+
+exports[`Report > serializeReport > it should serialize a serialize a simple report 1`] = `
+{
+  "latestPackages": {},
+}
+`;

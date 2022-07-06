@@ -1,0 +1,42 @@
+html,
+body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Allow for our pages to be at least the full page height and have flexible sizes. */
+#__next {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TODO: get rid of this when https://github.com/mui/mui-x/pull/4859 lands */
+.MuiDataGrid-viewport,
+.MuiDataGrid-row,
+.MuiDataGrid-renderingZone {
+  max-height: none !important;
+}
+
+.MuiDataGrid-cell {
+  max-height: none !important;
+  overflow: auto;
+  white-space: initial !important;
+  line-height: 16px !important;
+  display: flex !important;
+  align-items: center;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}

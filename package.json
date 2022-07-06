@@ -1,14 +1,32 @@
 {
-  "name": "root",
+  "name": "package-inspector",
+  "version": "0.0.1",
+  "description": "Tooling for inspecting your project package",
+  "main": "index.js",
+  "repository": "git@github.com:gabrielcspao/package-inspector.git",
+  "license": "MIT",
   "private": true,
+  "workspaces": [
+    "packages/core",
+    "packages/graphql",
+    "packages/*"
+  ],
   "scripts": {
-    "lint": "npm run lint --workspaces",
     "build": "npm run build --workspaces",
-    "example-report": "npm run build && ./packages/package-inspector/bin/index.js --report --outputDir report",
+    "dev:ui": "npm run dev --workspace=@package-inspector/ui",
+    "test:ci": "npm run test:ci --workspaces",
+    "lint:ci": "npm run lint --workspaces",
     "prepare": "husky install"
   },
   "devDependencies": {
-    "husky": "^7.0.0"
+    "husky": "^7.0.4",
+    "lint-staged": "^12.4.0",
+    "prettier": "2.6.2"
   },
-  "workspaces": ["packages/*"]
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
+  },
+  "volta": {
+    "node": "16.15.0"
+  }
 }
