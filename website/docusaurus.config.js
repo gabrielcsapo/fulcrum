@@ -1,6 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+const path = require('path');
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
@@ -15,6 +16,23 @@ const config = {
   favicon: 'img/favicon.ico',
   organizationName: 'es-maintenance',
   projectName: 'package-inspector',
+
+  plugins: [
+    [
+      'docusaurus-plugin-typedoc-api',
+      {
+        tsconfigName: 'tsconfig.docs.json',
+        projectRoot: path.join(__dirname, '..'),
+        packages: [
+          'packages/cli',
+          'packages/core',
+          'packages/graphql',
+          'packages/plugin-preset',
+          'packages/ui',
+        ],
+      },
+    ],
+  ],
 
   presets: [
     [
@@ -48,6 +66,11 @@ const config = {
             docId: 'intro',
             position: 'left',
             label: 'Getting Started',
+          },
+          {
+            to: 'api',
+            label: 'API',
+            position: 'left',
           },
           {
             href: 'https://github.com/es-maintenance/package-inspector',

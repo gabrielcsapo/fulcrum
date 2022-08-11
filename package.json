@@ -9,12 +9,13 @@
   "workspaces": [
     "packages/core",
     "packages/graphql",
-    "packages/*"
+    "packages/*",
+    "website"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
     "dev:ui": "npm run dev --workspace=@package-inspector/ui",
-    "test:ci": "npm run test:ci --workspaces",
+    "test:ci": "npm run test:ci --workspaces --if-present",
     "lint:ci": "npm run lint --workspaces",
     "prepare": "husky install"
   },
